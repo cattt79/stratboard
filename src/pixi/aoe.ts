@@ -134,9 +134,19 @@ export const AOE_COLORS = {
 
 // 模仿游戏内颜色的一些预设
 export const AOE_PRESET = {
+  style_1: {
+    colors: { aoe: '#feca9b', outerGlow: '#feca9b', innerShadow: '#4b3f2f' },
+    aoeAlpha: 0.24,
+    innerShadowOptions: { alpha: 0.8 },
+  },
   lockon_circle_aoe_1: {
     colors: { aoe: '#feca9b', outerGlow: '#feca9b', innerShadow: '#4b3f2f' },
     aoeAlpha: 0.12,
+    innerShadowOptions: { alpha: 0.4 },
+  },
+  lockon_circle_aoe_2: {
+    colors: { aoe: '#8dcc85', outerGlow: '#8dcc85', innerShadow: '#344c31' },
+    aoeAlpha: 0.2,
     innerShadowOptions: { alpha: 0.4 },
   },
 } as const
