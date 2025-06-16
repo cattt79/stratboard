@@ -48,14 +48,20 @@ import StratBoard from '@/components/StratBoard.astro'
 
     // 墙体
     const rectParam = { w: 200, h: 50, color: 0x2e8b57 }
-    const wallRect = { x: -floor.width / 1.65, y: -floor.height / 3, w: rectParam.h, h: rectParam.w }
+    const wallRect = [
+      { x: -floor.width / 1.65, y: -floor.height / 3, w: rectParam.h, h: rectParam.w }, // 左
+      { x: floor.width / 8, y: floor.height / 1.8, w: rectParam.w, h: rectParam.h }, // 下
+      { x: -floor.width / 2.5, y: -floor.height / 1.4, w: rectParam.w, h: rectParam.h }, // 上
+    ]
     const wallPos: { x: number; y: number }[] = []
-    const g = new Graphics()
-    g.rect(wallRect.x, wallRect.y, wallRect.w, wallRect.h)
-    g.fill(rectParam.color)
-    g.endFill()
-    container.addChild(g)
-    wallPos.push({ x: wallRect.x + wallRect.w / 2, y: wallRect.y + wallRect.h / 2 })
+    wallRect.forEach((r) => {
+      const g = new Graphics()
+      g.rect(r.x, r.y, r.w, r.h)
+      g.fill(rectParam.color)
+      g.endFill()
+      container.addChild(g)
+      wallPos.push({ x: r.x + r.w / 2, y: r.y + r.h / 2 })
+    })
 
     // 角色图标
     const roleParam: { type: RoleType; tag: string; x: number; y: number; a: number }[] = [
