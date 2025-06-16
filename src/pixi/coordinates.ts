@@ -467,3 +467,18 @@ export function extendCoordinates(coord: Coordinates, extensionLength: number): 
 
   throw new Error('不支持的坐标类型')
 }
+
+// 坐标相加：将两个坐标相加，返回笛卡尔坐标
+export function addCoordinates(coord1: Coordinates, coord2: Coordinates): CartesianCoordinates {
+  // 将两个坐标都转换为笛卡尔坐标
+  const cart1 = convertCoordinates(coord1, 'cartesian')
+  const cart2 = convertCoordinates(coord2, 'cartesian')
+
+  // 对应分量相加
+  const result: CartesianCoordinates = {
+    x: cart1.x + cart2.x,
+    y: cart1.y + cart2.y,
+  }
+
+  return CartesianCoordinatesSchema.parse(result)
+}
