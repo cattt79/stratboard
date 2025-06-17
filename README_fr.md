@@ -6,7 +6,7 @@ Ce projet est un tableau de diagrammes tactiques pour le site web [`xivstrat.com
 
 ## Restrictions d'utilisation des ressources
 
-**⚠️ Tous les fichiers et dossiers sous le chemin public/assets sont des ressources restreintes, soumises aux limitations d'utilisation suivantes :**
+**⚠️ Tous les fichiers et dossiers sous le chemin public/ sont des ressources restreintes, soumises aux limitations d'utilisation suivantes :**
 
 - À utiliser uniquement pour le développement et la construction du site web [`xivstrat.com`](https://xivstrat.com)
 - L'utilisation à toute autre fin, commerciale ou non commerciale, est interdite sans autorisation explicite
