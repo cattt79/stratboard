@@ -93,14 +93,14 @@ import StratBoard from '@/components/StratBoard.astro'
     ]
 
     const roleParams: { type: RoleType; tag: string; p: Coordinates }[] = [
-      { type: 'healer', tag: 'H2', p: { r: 3.2, deg: -135 } },
-      { type: 'tank', tag: 'MT', p: { r: 3.2, deg: -45 } },
-      { type: 'healer', tag: 'H1', p: { r: 3.2, deg: 45 } },
-      { type: 'tank', tag: 'ST', p: { r: 3.2, deg: 135 } },
-      { type: 'melee', tag: 'D1', p: { r: 3.2, deg: 180 } },
-      { type: 'dps', tag: 'D2', p: { r: 3.2, deg: 90 } },
-      { type: 'ranged', tag: 'D3', p: { r: 3.2, deg: -90 } },
-      { type: 'magic', tag: 'D4', p: { r: 3.2, deg: 0 } },
+      { type: 'magic', tag: 'D4', p: { r: 3.2, deg: -135 } },
+      { type: 'dps', tag: 'D2', p: { r: 3.2, deg: -45 } },
+      { type: 'melee', tag: 'D1', p: { r: 3.2, deg: 45 } },
+      { type: 'ranged', tag: 'D3', p: { r: 3.2, deg: 135 } },
+      { type: 'tank', tag: 'MT', p: { r: 3.2, deg: -90 } },
+      { type: 'tank', tag: 'ST', p: { r: 3.2, deg: 0 } },
+      { type: 'healer', tag: 'H2', p: { r: 3.2, deg: 90 } },
+      { type: 'healer', tag: 'H1', p: { r: 3.2, deg: 180 } },
     ]
 
     for (let i = 0; i < 4; i++) {
