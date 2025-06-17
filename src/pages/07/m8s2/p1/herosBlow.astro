@@ -11,10 +11,9 @@ import StratBoard from '@/components/StratBoard.astro'
 
 <script>
   import { listenKeys } from 'nanostores'
-  import { Assets, Container, Sprite } from 'pixi.js'
+  import { Assets, Container, Graphics, Sprite } from 'pixi.js'
 
-  import type { RoleType } from '@/lib/role'
-
+  import { AoE, AOE_COLORS } from '@/pixi/aoe'
   import { Role } from '@/pixi/role'
   import { getScale, YmToPx } from '@/pixi/scale'
   import { $stratBoards } from '@/stores/stratBoards'
@@ -39,20 +38,28 @@ import StratBoard from '@/components/StratBoard.astro'
     floor.scale.set(getScale() * 1.25)
     container.addChild(floor)
 
-    const roleParams: { type: RoleType; tag: string }[] = [
-      { type: 'tank', tag: 'MT' },
-      { type: 'tank', tag: 'ST' },
-      { type: 'healer', tag: 'H1' },
-      { type: 'healer', tag: 'H2' },
-      { type: 'melee', tag: 'D1' },
-    ]
-    roleParams.forEach((r, i) => {
-      const radian = (2 * i * Math.PI) / 5
-      const role = new Role(r.type, r.tag)
-      role.scale.set(0.4)
-      role.position.set(-17.54 * YmToPxLarge * Math.sin(radian), 17.54 * YmToPxLarge * Math.cos(radian))
-      container.addChild(role)
-    })
+    // add the rest of party on the south platform
+    const allParty = new Role('any')
+    allParty.scale.set(0.4)
+    allParty.position.set(-17.54 * YmToPxLarge * Math.sin(0), 17.54 * YmToPxLarge * Math.cos(0))
+    container.addChild(allParty)
+
+    // 半场刀
+    const fan = AoE.createFan(40, 180, { colors: AOE_COLORS.tailwind.orange }).toSprite(app)
+    fan.anchor.set(0.5, centerToNorth / (centerToNorth + centerToSouth))
+    fan.rotation = 0
+    fan.alpha = 0.75
+
+    const mask = new Graphics()
+    for (let i = 0; i < 5; i++) {
+      const r = (2 * i * Math.PI) / 5
+      mask.circle(-17.54 * YmToPxLarge * Math.sin(r), 17.54 * YmToPxLarge * Math.cos(r), 8 * YmToPxLarge)
+    }
+    mask.fill({ color: 'white' })
+    fan.mask = mask
+    fan.addChild(mask)
+
+    container.addChild(fan)
 
     // take screenshot
     await new Promise((resolve) => setTimeout(resolve, 1000))
