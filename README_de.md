@@ -6,7 +6,7 @@ Dieses Projekt ist ein taktisches Diagramm-Board für die Website [`xivstrat.com
 
 ## Nutzungsbeschränkungen für Ressourcen
 
-**⚠️ Alle Dateien und Ordner unter dem Pfad public/assets sind eingeschränkte Ressourcen und unterliegen den folgenden Nutzungsbeschränkungen:**
+**⚠️ Alle Dateien und Ordner unter dem Pfad public/ sind eingeschränkte Ressourcen und unterliegen den folgenden Nutzungsbeschränkungen:**
 
 - Nur für die Entwicklung und den Aufbau der Website [`xivstrat.com`](https://xivstrat.com) zu verwenden
 - Die Nutzung für andere Zwecke, ob kommerziell oder nicht-kommerziell, ist ohne ausdrückliche Genehmigung untersagt
