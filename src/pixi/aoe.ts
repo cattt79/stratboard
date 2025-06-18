@@ -176,7 +176,7 @@ export interface AoECreateOptions {
   outerGlowOptions?: Partial<GlowFilterOptions>
 }
 
-export type AoEType = 'rect' | 'ray' | 'circle' | 'ring' | 'fan'
+export type AoEType = 'rect' | 'ray' | 'circle' | 'ring' | 'fan' | 'x'
 
 export class AoETexture extends Texture {
   type: AoEType
@@ -460,6 +460,48 @@ export class AoE extends Container {
       fan.position = convertCoordinates(scaleCoordinates(param.position ?? { x: 0, y: 0 }, YmToPx), 'cartesian')
       fan.rotation = degToRad(param.rotation ?? 0)
       c.addChild(fan)
+    })
+    return c
+  }
+
+  /**
+   * 创建X形AoE效果
+   */
+  static createX(width: number, length: number, options: AoECreateOptions = {}): AoE {
+    const { resolution = DEFAULT_AOE_RESOLUTION } = options
+
+    return new AoE(
+      'x',
+      resolution,
+      style => G.createXGraphics(width, length, style, resolution),
+      options.colors,
+      options.aoeAlpha,
+      options.innerShadowOptions,
+      options.outerGlowOptions,
+    )
+  }
+
+  /**
+   * 批量创建X形AoE效果
+   */
+  static createXs(
+    app: Application,
+    params: { alpha?: number; position?: Coordinates; rotation?: number; width?: number; length?: number; options?: AoECreateOptions }[],
+      defaultWidth: number = 0,
+      defaultLength: number = 0,
+      defaultOptions: AoECreateOptions = {},
+  ) {
+    const c = new Container()
+    params.forEach((param) => {
+      const x = AoE.createX(
+        param.width ?? defaultWidth,
+        param.length ?? defaultLength,
+        param.options ?? defaultOptions,
+      ).toSprite(app)
+      x.alpha = param.alpha ?? 1
+      x.position = convertCoordinates(scaleCoordinates(param.position ?? { x: 0, y: 0 }, YmToPx), 'cartesian')
+      x.rotation = degToRad(param.rotation ?? 0)
+      c.addChild(x)
     })
     return c
   }
