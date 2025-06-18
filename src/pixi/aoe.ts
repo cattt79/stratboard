@@ -139,6 +139,10 @@ export const AOE_PRESET = {
     aoeAlpha: 0.24,
     innerShadowOptions: { alpha: 0.8 },
   },
+  style_2: {
+    colors: { aoe: '#a1f1fe', outerGlow: '#7dd3fc', innerShadow: '#0369a1' },
+    aoeAlpha: 0.12,
+  },
   lockon_circle_aoe_1: {
     colors: { aoe: '#feca9b', outerGlow: '#feca9b', innerShadow: '#4b3f2f' },
     aoeAlpha: 0.12,
