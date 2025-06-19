@@ -19,8 +19,8 @@ import StratBoard from '@/components/StratBoard.astro'
   import { getScale, YmToPx } from '@/pixi/scale'
   import { $stratBoards } from '@/stores/stratBoards'
 
-  import floor_img from '/assets/07/m8s2/floor_2@3x.png?url'
-  import stack_omen_img from '/game/vfx/lockon/eff/com_share4a1@3x.png?url'
+  import floor_img from '/assets/07/m8s2/floor_3@3x.png?url'
+  import stack_omen_img from '/assets/game/vfx/lockon/eff/com_share4a1@3x.png?url'
 
   const name = 'demo'
 
@@ -37,9 +37,10 @@ import StratBoard from '@/components/StratBoard.astro'
     const centerToSouth = 17.54 + 8
     const radianSW = (2 * 1 * Math.PI) / 5
     const radianSE = -(2 * 1 * Math.PI) / 5
+    const YmToPxLarge = 1.25 * YmToPx
     // const radius = 17.54
     floor.anchor.set(0.5, centerToNorth / (centerToNorth + centerToSouth))
-    floor.scale.set(getScale())
+    floor.scale.set(getScale() * 1.25)
     container.addChild(floor)
 
     // const roleParams: { type: RoleType; tag: string, p: PolarRadianCoordinates}[] = [
@@ -67,7 +68,7 @@ import StratBoard from '@/components/StratBoard.astro'
     roleParams.forEach((r) => {
       const role = new Role(r.type, r.tag)
       role.scale.set(0.4)
-      role.position.set(r.x * YmToPx, r.y * YmToPx)
+      role.position.set(r.x * YmToPxLarge, r.y * YmToPxLarge)
       container.addChild(role)
     })
 
@@ -81,7 +82,7 @@ import StratBoard from '@/components/StratBoard.astro'
     stackOmenParams.forEach((r) => {
       const stackOmen = Sprite.from(stackOmenTexture)
       stackOmen.anchor.set(0.5, 0.5)
-      stackOmen.position.set(r.x * YmToPx, r.y * YmToPx)
+      stackOmen.position.set(r.x * YmToPxLarge, r.y * YmToPxLarge)
       stackOmen.scale.set(getScale() * 1)
       container.addChild(stackOmen)
     })
