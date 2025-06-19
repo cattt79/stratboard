@@ -482,3 +482,18 @@ export function addCoordinates(coord1: Coordinates, coord2: Coordinates): Cartes
 
   return CartesianCoordinatesSchema.parse(result)
 }
+
+// 计算两个坐标的中心点
+export function getMidpoint(coord1: Coordinates, coord2: Coordinates): CartesianCoordinates {
+  // 将两个坐标都转换为笛卡尔坐标
+  const cart1 = convertCoordinates(coord1, 'cartesian')
+  const cart2 = convertCoordinates(coord2, 'cartesian')
+
+  // 计算中心点坐标
+  const midpoint: CartesianCoordinates = {
+    x: (cart1.x + cart2.x) / 2,
+    y: (cart1.y + cart2.y) / 2,
+  }
+
+  return CartesianCoordinatesSchema.parse(midpoint)
+}
