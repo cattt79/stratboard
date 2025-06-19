@@ -1,6 +1,7 @@
 ---
 import Layout from '@/layouts/Layout.astro'
 import StratBoard from '@/components/StratBoard.astro'
+//左半场刀+月环
 ---
 
 <Layout title="M8S2">
@@ -43,13 +44,13 @@ import StratBoard from '@/components/StratBoard.astro'
     // add the rest of party on the south platform
     const allParty = new Role('any')
     allParty.scale.set(0.4)
-    allParty.position.set((-17.54 * Math.sin(0) - 2) * YmToPxLarge, (17.54 * Math.cos(0) + 6) * YmToPxLarge)
+    allParty.position.set((-17.54 * Math.sin(0) + 2) * YmToPxLarge, (17.54 * Math.cos(0) - 6) * YmToPxLarge)
     container.addChild(allParty)
 
     // 半场刀
     const fan = AoE.createFan(40, 180, { colors: AOE_COLORS.tailwind.orange }).toSprite(app)
     // fan.anchor.set(0.5, centerToNorth / (centerToNorth + centerToSouth))
-    fan.rotation = 0
+    fan.rotation = Math.PI
     fan.alpha = 0.75
 
     // 可选mask如果会更好看的话
@@ -65,7 +66,8 @@ import StratBoard from '@/components/StratBoard.astro'
     container.addChild(fan)
 
     // 浮游炮
-
+    // 此处内环安全区15.4是预估值
+    const innerCircle = 15.4
     const fangs = new Container()
     for (let i = 0; i < 5; i++) {
       const radian = (2 * i * Math.PI) / 5 - 0.6
@@ -75,7 +77,7 @@ import StratBoard from '@/components/StratBoard.astro'
       fang.scale.set(0.025)
 
       // fang.angle = Math.atan2(p.y - 0, p.x - 0) * (180 / Math.PI) - 90
-      fang.angle = (radian + 0.32) * (180 / Math.PI) - 90
+      fang.angle = (radian + 0.32) * (180 / Math.PI) + 90
 
       const p_adjust = convertCoordinates({ r: 22, rad: radian + 0.32 + (-1) ** i * 0.0 }, 'cartesian')
       const angle = Math.atan2(p_adjust.y - 0, p_adjust.x - 0)
@@ -89,7 +91,7 @@ import StratBoard from '@/components/StratBoard.astro'
 
     container.addChild(fangs)
 
-    container.addChild(AoE.createCircle(22 * 1.25).toSprite(app))
+    container.addChild(AoE.createRing(innerCircle * 1.25, 40).toSprite(app))
 
     // take screenshot
     await new Promise((resolve) => setTimeout(resolve, 1000))

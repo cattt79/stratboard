@@ -1,6 +1,7 @@
 ---
 import Layout from '@/layouts/Layout.astro'
 import StratBoard from '@/components/StratBoard.astro'
+//左侧半场刀+钢铁
 ---
 
 <Layout title="M8S2">
@@ -43,13 +44,13 @@ import StratBoard from '@/components/StratBoard.astro'
     // add the rest of party on the south platform
     const allParty = new Role('any')
     allParty.scale.set(0.4)
-    allParty.position.set((-17.54 * Math.sin(0) - 2) * YmToPxLarge, (17.54 * Math.cos(0) + 6) * YmToPxLarge)
+    allParty.position.set((-17.54 * Math.sin(0) + 2) * YmToPxLarge, (17.54 * Math.cos(0) + 6) * YmToPxLarge)
     container.addChild(allParty)
 
     // 半场刀
     const fan = AoE.createFan(40, 180, { colors: AOE_COLORS.tailwind.orange }).toSprite(app)
     // fan.anchor.set(0.5, centerToNorth / (centerToNorth + centerToSouth))
-    fan.rotation = 0
+    fan.rotation = Math.PI
     fan.alpha = 0.75
 
     // 可选mask如果会更好看的话
@@ -65,7 +66,6 @@ import StratBoard from '@/components/StratBoard.astro'
     container.addChild(fan)
 
     // 浮游炮
-
     const fangs = new Container()
     for (let i = 0; i < 5; i++) {
       const radian = (2 * i * Math.PI) / 5 - 0.6

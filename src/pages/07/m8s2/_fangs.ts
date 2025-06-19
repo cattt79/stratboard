@@ -27,13 +27,12 @@ export async function addFangs(app: Application, multiplefangs = false, activate
     const radian = (2 * i * Math.PI) / 5
 
     const fang = Sprite.from(activeFangTexture)
-    const p = convertCoordinates({ r: radius + 8, rad: radian + 0.32 }, 'cartesian')
     fang.anchor.set(0.5, centerToNorth / (centerToNorth + centerToSouth))
     fang.scale.set(0.025)
 
     // rotation in degree, always facing center?
     // rotation first, then adjust position
-    fang.angle = Math.atan2(p.y - 0, p.x - 0) * (180 / Math.PI) - 90
+    fang.angle = (radian + 0.32) * (180 / Math.PI) - 90
     const p_adjust = convertCoordinates({ r: radius + 8, rad: radian + 0.32 + (-1) ** i * 0.0 }, 'cartesian')
     const angle = Math.atan2(p_adjust.y - 0, p_adjust.x - 0)
     fang.position.set((p_adjust.x - (-1) ** i * (-1) ** pattern * fangAdjust * Math.sin(angle)) * YmToPxLarge, (p_adjust.y
