@@ -78,7 +78,7 @@ import StratBoard from '@/components/StratBoard.astro'
       // fang.angle = Math.atan2(p.y - 0, p.x - 0) * (180 / Math.PI) - 90
       fang.angle = (radian + 0.32) * (180 / Math.PI) - 90
 
-      const p_adjust = convertCoordinates({ r: 22, rad: radian + 0.32 + (-1) ** i * 0.0 }, 'cartesian')
+      const p_adjust = convertCoordinates({ r: 21, rad: radian + 0.32 + (-1) ** i * 0.0 }, 'cartesian')
       const angle = Math.atan2(p_adjust.y - 0, p_adjust.x - 0)
       fang.position.set(
         (p_adjust.x - (-1) ** i * Math.sin(angle)) * YmToPxLarge,
