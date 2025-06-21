@@ -148,12 +148,17 @@ export const AOE_PRESET = {
     aoeAlpha: 0.1,
     innerShadowOptions: { alpha: 0.4 },
   },
+  style_4: { // 绿色
+    colors: { aoe: '#86efac', outerGlow: '#bbf7d0', innerShadow: '#16a34a' },
+    aoeAlpha: 0.1,
+    innerShadowOptions: { alpha: 0.4 },
+  },
   lockon_circle_aoe_1: { // 模仿淡黄圈点名
     colors: { aoe: '#feca9b', outerGlow: '#feca9b', innerShadow: '#4b3f2f' },
     aoeAlpha: 0.12,
     innerShadowOptions: { alpha: 0.4 },
   },
-  lockon_circle_aoe_2: {
+  lockon_circle_aoe_2: { // 模仿风圈效果
     colors: { aoe: '#8dcc85', outerGlow: '#8dcc85', innerShadow: '#344c31' },
     aoeAlpha: 0.2,
     innerShadowOptions: { alpha: 0.4 },

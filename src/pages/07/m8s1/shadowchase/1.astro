@@ -5,7 +5,7 @@ import StratBoard from '@/components/StratBoard.astro'
 
 <Layout title="M8S1">
   <div class="flex h-screen w-screen items-center justify-center">
-    <StratBoard key="stratboard" canvasClass="scale-200" />
+    <StratBoard key="stratboard" canvasClass="h-full w-full" />
   </div>
 </Layout>
 
@@ -13,21 +13,18 @@ import StratBoard from '@/components/StratBoard.astro'
   import { listenKeys } from 'nanostores'
   import { Assets, Container, Graphics, Sprite } from 'pixi.js'
 
-  import type { CombinedRoleType, RoleType } from '@/lib/role'
-  import type { Coordinates } from '@/pixi/coordinates'
-
+  import { AoE, AOE_PRESET } from '@/pixi/aoe'
   import { convertCoordinates, degToRad, scaleCoordinates } from '@/pixi/coordinates'
-  import { createRoleIcon } from '@/pixi/role'
   import { getScale, YmToPx } from '@/pixi/scale'
   import { setWaymark } from '@/pixi/waymark'
   import { $stratBoards } from '@/stores/stratBoards'
 
-  import { create_wolf } from '../_adds'
+  import { createBoss } from '../_boss'
   import { waymarkData } from '../_waymark'
 
-  import floor_img from '/assets/07/m8s1/floor_5@3x.png?url'
+  import floor_img from '/assets/07/m8s1/floor_1@3x.png?url'
 
-  const name = '9'
+  const name = '1'
 
   listenKeys($stratBoards, ['stratboard'], async (stratBoards) => {
     const app = stratBoards.stratboard
@@ -42,33 +39,25 @@ import StratBoard from '@/components/StratBoard.astro'
     floor.scale.set(getScale(50, 0.78))
     container.addChild(floor)
 
-    await setWaymark(container, waymarkData, 0.65)
+    await setWaymark(container, waymarkData, 0.65, 1)
 
-    const wolfOfWindPosition = { r: 10, deg: 291 }
-    const wolfOfStonePosition = { r: 10, deg: 249 }
+    const R = 6 * Math.SQRT2
 
-    const roleParams: { type: RoleType | CombinedRoleType; tag: string; p: Coordinates }[] = [
-      { type: 'tank', tag: '', p: { r: 10.25, deg: wolfOfStonePosition.deg + 15 } },
-      { type: 'healer|dps', tag: '', p: { r: 10.45, deg: wolfOfStonePosition.deg - 18 } },
-      { type: 'tank', tag: '', p: { r: 10.25, deg: wolfOfWindPosition.deg - 15 } },
-      { type: 'healer|dps', tag: '', p: { r: 10.45, deg: wolfOfWindPosition.deg + 18 } },
-    ]
+    for (let i = 0; i < 5; i++) {
+      const deg = -90 + 72 * i
+      const p = scaleCoordinates(convertCoordinates({ r: R, deg }, 'cartesian'), YmToPx)
 
-    roleParams.forEach((r) => {
-      const role = createRoleIcon(r.type, r.tag)
-      role.scale.set(0.4 * 0.78)
-      role.position = scaleCoordinates(convertCoordinates(r.p, 'cartesian'), YmToPx)
-      container.addChild(role)
-    })
+      const aoe = AoE.createRay(8, 40, AOE_PRESET.style_2).toSprite(app)
+      aoe.position = p
+      aoe.rotation = degToRad(deg + 180)
+      aoe.zIndex = 0
+      container.addChild(aoe)
 
-    const wolfOfWind = await create_wolf('wind')
-    wolfOfWind.rotation = degToRad(wolfOfWindPosition.deg + 180)
-    wolfOfWind.position = scaleCoordinates(convertCoordinates(wolfOfWindPosition, 'cartesian'), YmToPx)
-    container.addChild(wolfOfWind)
-    const wolfOfStone = await create_wolf('stone')
-    wolfOfStone.rotation = degToRad(wolfOfStonePosition.deg)
-    wolfOfStone.position = scaleCoordinates(convertCoordinates(wolfOfStonePosition, 'cartesian'), YmToPx)
-    container.addChild(wolfOfStone)
+      const boss = await createBoss()
+      boss.position = p
+      boss.zIndex = 2
+      container.addChild(boss)
+    }
 
     const circleMask = new Graphics()
     const circleRadius = 15.1 * YmToPx
