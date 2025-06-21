@@ -150,6 +150,11 @@ import StratBoard from '@/components/StratBoard.astro'
       roles.push(role)
     })
 
+    const g = new Graphics()
+    g.rect(-10 * YmToPx, 0 * YmToPx, 5 * YmToPx, 5 * YmToPx)
+    g.stroke({ color: '#ef4444', width: 4 })
+    container.addChild(g)
+
     // take screenshot
     await new Promise((resolve) => setTimeout(resolve, 1000))
     const url = await app.renderer.extract.base64(app.stage)
