@@ -43,7 +43,7 @@ export class CombinedRole extends CombinedIcon {
   role: CombinedRoleType
   tag: string = ''
 
-  constructor(role1: 'tank' | 'healer' | 'dps', role2: 'tank' | 'healer' | 'dps', tag: string = '') {
+  constructor(role1: 'tank' | 'healer' | 'dps', role2: 'tank' | 'healer' | 'dps' | 'ranged_magic', tag: string = '') {
     super(roleImgMap[role1], roleImgMap[role2], tag)
     this.role = `${role1}|${role2}` as CombinedRoleType
     this.tag = tag

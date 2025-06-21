@@ -13,21 +13,16 @@ import StratBoard from '@/components/StratBoard.astro'
   import { listenKeys } from 'nanostores'
   import { Assets, Container, Graphics, Sprite } from 'pixi.js'
 
-  import type { RoleType } from '@/lib/role'
-
-  import { Role } from '@/pixi/role'
   import { getScale, YmToPx } from '@/pixi/scale'
   import { setWaymark } from '@/pixi/waymark'
   import { $stratBoards } from '@/stores/stratBoards'
 
   import { waymarkDataDB } from '../_waymark'
 
-  import floor_img from '/assets/07/m7s/floor_p2_2@3x.png?url'
+  import floor_img from '/assets/07/m7s/floor_p2_3@3x.png?url'
   import wall_img from '/assets/07/m7s/wall/wall_2.png?url'
-  import chn_img from '/game/vfx/channeling/eff/chn_m0935dg2_c0p@3x.png?url'
-  import flare_img from '/game/vfx/lockon/eff/flare_aoe.png?url'
 
-  const name = 'AbBlink_flare2'
+  const name = 'AbBlink_flare1'
 
   listenKeys($stratBoards, ['stratboard'], async (stratBoards) => {
     const app = stratBoards.stratboard
@@ -51,10 +46,7 @@ import StratBoard from '@/components/StratBoard.astro'
       { x: -12, y: -18, w: rectParam.w, h: rectParam.h, r: 0 }, // 上
       { x: 12, y: 18, w: rectParam.w, h: rectParam.h, r: Math.PI }, // 下
     ]
-
     const wall_texture = await Assets.load(wall_img)
-
-    // 墙体
     wallRect.forEach((r) => {
       const g = new Graphics()
       g.rect(r.x * YmToPx - r.w / 2, r.y * YmToPx - r.h / 2, r.w, r.h)
@@ -69,57 +61,6 @@ import StratBoard from '@/components/StratBoard.astro'
       wall.width = 200
       container.addChild(wall)
     })
-
-    // 角色图标
-    const roleParam: { type: RoleType; x: number; y: number; a: number }[] = [
-      { type: 'tank', x: -23.75, y: 11.25, a: 1 },
-      { type: 'all', x: -21, y: -11.25, a: 1 },
-      { type: 'tank', x: -23.75, y: -11.25, a: 1 },
-    ]
-
-    // 角色图标
-    const flareTexture = await Assets.load(flare_img)
-    // 核爆
-    const flare = new Sprite(flareTexture)
-    flare.anchor.set(0.5, 0.5)
-    flare.scale.set(getScale() / 6)
-    flare.position.set(roleParam[0].x * YmToPx, (roleParam[0].y + 1) * YmToPx)
-    container.addChild(flare)
-
-    const flareTank = new Role(roleParam[0].type)
-    flareTank.scale.set(0.4)
-    flareTank.position.set(roleParam[0].x * YmToPx, roleParam[0].y * YmToPx)
-    flareTank.alpha = roleParam[0].a
-    container.addChild(flareTank)
-
-    const chnTank = new Role(roleParam[2].type)
-    chnTank.scale.set(0.4)
-    chnTank.position.set(roleParam[2].x * YmToPx, roleParam[2].y * YmToPx)
-    chnTank.alpha = roleParam[2].a
-    container.addChild(chnTank)
-    // 连线
-    const chnTexture = await Assets.load(chn_img)
-    const p1 = { x: roleParam[2].x * YmToPx, y: roleParam[2].y * YmToPx }
-    const p2 = { x: wallRect[0].x * YmToPx, y: wallRect[0].y * YmToPx }
-
-    const dx = p2.x - p1.x
-    const dy = p2.y - p1.y
-    const len = Math.sqrt(dx * dx + dy * dy)
-    const angle = Math.atan2(dy, dx)
-
-    const chn = new Sprite(chnTexture)
-    chn.anchor.set(0, 0.5)
-    chn.position.set(p2.x - 2 * YmToPx, p2.y + 3 * YmToPx)
-    chn.rotation = angle + Math.PI
-    chn.width = len * 1.4
-    chn.height = 5 * YmToPx
-    container.addChild(chn)
-
-    const role = new Role(roleParam[1].type)
-    role.scale.set(0.4)
-    role.position.set(roleParam[1].x * YmToPx, roleParam[1].y * YmToPx)
-    role.alpha = roleParam[1].a
-    container.addChild(role)
 
     // 蒙版
     const rectMask = new Graphics()
