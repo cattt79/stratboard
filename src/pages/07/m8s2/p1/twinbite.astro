@@ -19,7 +19,7 @@ import StratBoard from '@/components/StratBoard.astro'
   import { getScale, YmToPx } from '@/pixi/scale'
   import { $stratBoards } from '@/stores/stratBoards'
 
-  import floor_img from '/assets/07/m8s2/floor_3@3x.png?url'
+  import floor_img from '/assets/07/m8s2/floor_2@3x.png?url'
 
   const name = 'demo'
 
@@ -47,14 +47,14 @@ import StratBoard from '@/components/StratBoard.astro'
     roleParams.forEach((r) => {
       const radian = (2 * r.platform * Math.PI) / 5
       const role = new Role(r.type, r.tag)
-      role.scale.set(0.4)
+      role.scale.set(0.6)
       role.position.set(-17.54 * YmToPxLarge * Math.sin(radian), 17.54 * YmToPxLarge * Math.cos(radian))
       container.addChild(role)
     })
 
     // add the rest of party on the south platform
     const allParty = new CombinedRole('healer', 'dps')
-    allParty.scale.set(0.4)
+    allParty.scale.set(0.6)
     allParty.position.set(-17.54 * YmToPxLarge * Math.sin(0), 17.54 * YmToPxLarge * Math.cos(0))
     container.addChild(allParty)
 

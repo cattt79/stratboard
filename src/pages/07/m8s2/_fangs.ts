@@ -1,7 +1,8 @@
 import type { Application } from 'pixi.js'
 
-import { Assets, Container, Sprite } from 'pixi.js'
+import { Assets, Container, Graphics, Sprite } from 'pixi.js'
 
+import { AoE } from '@/pixi/aoe'
 import { convertCoordinates } from '@/pixi/coordinates'
 import { YmToPx } from '@/pixi/scale'
 
@@ -26,7 +27,7 @@ export async function addFangs(app: Application, multiplefangs = false, activate
   for (let i = 0; i < 5; i++) {
     const radian = (2 * i * Math.PI) / 5
 
-    const fang = Sprite.from(activeFangTexture)
+    const fang = activate ? Sprite.from(activeFangTexture) : Sprite.from(inactiveFangTexture)
     fang.anchor.set(0.5, centerToNorth / (centerToNorth + centerToSouth))
     fang.scale.set(0.025)
 
@@ -40,7 +41,7 @@ export async function addFangs(app: Application, multiplefangs = false, activate
     fangs.addChild(fang)
 
     if (multiplefangs) {
-      const fang = activate ? Sprite.from(activeFangTexture) : Sprite.from(inactiveFangTexture)
+      const fang = Sprite.from(inactiveFangTexture)
       const p = convertCoordinates({ r: radius + 8, rad: radian + 0.32 }, 'cartesian')
       fang.anchor.set(0.5, centerToNorth / (centerToNorth + centerToSouth))
       fang.scale.set(0.025)
@@ -54,6 +55,40 @@ export async function addFangs(app: Application, multiplefangs = false, activate
         + (-1) ** (i + 1) * (-1) ** pattern * fangAdjust * Math.cos(angle)) * YmToPxLarge)
       fangs.addChild(fang)
     }
+  }
+
+  if (activate) {
+    // create position of each rect
+    const rects = []
+    for (let i = 0; i < 5; i++) {
+      const p = {
+        x: -17.54 * 1.25 * Math.sin((2 * i * Math.PI) / 5),
+        y: 17.54 * 1.25 * Math.cos((2 * i * Math.PI) / 5),
+      }
+      rects.push({ position: p, rotation: Math.atan2(p.y - 0, p.x - 0) * (180 / Math.PI) - 90 })
+    }
+
+    const aoe = AoE.createRects(app, rects, 8 * 1.25, 16 * 1.25)
+    aoe.children.forEach((c, i) => {
+      const angle = Math.atan2(c.position.y - 0, c.position.x - 0)
+      // 算不明白的第五个，第五个会跟其他四个反着
+      // 很邪门，一样的计算方式浮游炮平移是对的，但是在aoe上最后一个就是错的
+      // 大概写的有点丑陋（能跑
+      c.position.set(
+        c.position.x + (i === 4 ? -1 : (-1) ** i * (-1) ** pattern) * 4 * Math.sin(angle) * YmToPxLarge,
+        c.position.y + (i === 4 ? 1 : (-1) ** (i + 1) * (-1) ** pattern) * 4 * Math.cos(angle) * YmToPxLarge,
+      )
+    })
+
+    const mask = new Graphics()
+    for (let i = 0; i < 5; i++) {
+      const r = (2 * i * Math.PI) / 5
+      mask.circle(-17.54 * YmToPxLarge * Math.sin(r), 17.54 * YmToPxLarge * Math.cos(r), 8 * YmToPxLarge)
+    }
+    mask.fill({ color: 'white' })
+    aoe.mask = mask
+    aoe.addChild(mask)
+    fangs.addChild(aoe)
   }
 
   return fangs
