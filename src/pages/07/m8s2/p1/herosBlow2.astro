@@ -43,12 +43,12 @@ import StratBoard from '@/components/StratBoard.astro'
 
     // add the rest of party on the south platform
     const allParty = new Role('any')
-    allParty.scale.set(0.4)
+    allParty.scale.set(0.6)
     allParty.position.set((-17.54 * Math.sin(0) + 2) * YmToPxLarge, (17.54 * Math.cos(0) + 6) * YmToPxLarge)
     container.addChild(allParty)
 
     // 半场刀
-    const fan = AoE.createFan(40, 180, { colors: AOE_COLORS.tailwind.orange }).toSprite(app)
+    const fan = AoE.createFan(33, 180, { colors: AOE_COLORS.tailwind.orange }).toSprite(app)
     // fan.anchor.set(0.5, centerToNorth / (centerToNorth + centerToSouth))
     fan.rotation = Math.PI
     fan.alpha = 0.75
