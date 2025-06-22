@@ -1,0 +1,151 @@
+---
+import Layout from '@/layouts/Layout.astro'
+import StratBoard from '@/components/StratBoard.astro'
+---
+
+<Layout title="M8S1">
+  <div class="flex h-screen w-screen items-center justify-center">
+    <StratBoard key="stratboard" canvasClass="h-full w-full" resolution={4} />
+  </div>
+</Layout>
+
+<script>
+  import { listenKeys } from 'nanostores'
+  import { Assets, Container, Graphics, Sprite } from 'pixi.js'
+
+  import type { CombinedRoleType, RoleType } from '@/lib/role'
+  import type { Coordinates } from '@/pixi/coordinates'
+
+  import { AoE, AOE_PRESET } from '@/pixi/aoe'
+  import { addCoordinates, convertCoordinates, degToRad, scaleCoordinates } from '@/pixi/coordinates'
+  import { createRoleIcon } from '@/pixi/role'
+  import { getScale, YmToPx } from '@/pixi/scale'
+  import { setWaymark } from '@/pixi/waymark'
+  import { $stratBoards } from '@/stores/stratBoards'
+
+  import { createTargetRing } from '../_target'
+  import { waymarkData } from '../_waymark'
+
+  import floor_img from '/assets/07/m8s1/floor_1@3x.png?url'
+  import stack_img from '/game/vfx/lockon/eff/com_share4a1@3x.png?url'
+
+  const name = 'solution_2'
+
+  listenKeys($stratBoards, ['stratboard'], async (stratBoards) => {
+    const app = stratBoards.stratboard
+
+    const c = new Container()
+    c.position.set(app.screen.width / 2, app.screen.height / 2)
+    app.stage.addChild(c)
+
+    const container = new Container()
+
+    const floorTexture = await Assets.load(floor_img)
+    const floor = Sprite.from(floorTexture)
+    floor.anchor.set(0.5, 0.5)
+    floor.scale.set(getScale(50, 0.78))
+    container.addChild(floor)
+
+    const aoe1 = AoE.createRects(
+      app,
+      [{ position: { x: -8, y: 0 } }, { position: { x: 0, y: -8 }, rotation: 90 }],
+      16,
+      32,
+    )
+    container.addChild(aoe1)
+    const aoe1Mask = new Graphics() // 遮罩
+    aoe1Mask.circle(0, 0, 15.1 * YmToPx)
+    aoe1Mask.fill({ color: 'white' })
+    aoe1.mask = aoe1Mask
+    aoe1.addChild(aoe1Mask)
+
+    const waymarks = await setWaymark(container, waymarkData, 0.65)
+    waymarks.forEach((waymark) => {
+      waymark.fgSprite!.rotation = degToRad(-45)
+    })
+
+    const targetRing = await createTargetRing()
+    container.addChild(targetRing)
+
+    const positions = [
+      { r: 5, deg: 86 },
+      { r: 5, deg: 4 },
+      { r: 11.5, deg: 88 },
+      { r: 11.5, deg: 2 },
+    ]
+    const stackPosition = { r: 11.5, deg: 45 }
+    const stackPositionXY = convertCoordinates(stackPosition, 'cartesian')
+
+    const aoe2 = AoE.createCircles(
+      app,
+      [{ position: positions[0] }, { position: positions[1] }, { position: positions[2] }, { position: positions[3] }],
+      6,
+      AOE_PRESET.style_3,
+    )
+    container.addChild(aoe2)
+
+    const stackTexture = await Assets.load(stack_img)
+    const stack = Sprite.from(stackTexture)
+    stack.anchor.set(0.5, 0.5)
+    stack.position = scaleCoordinates(stackPositionXY, YmToPx)
+    stack.scale.set(getScale() * 0.6)
+    container.addChild(stack)
+
+    const dot = new Graphics()
+    positions.forEach((p) => {
+      const { x, y } = convertCoordinates(p, 'cartesian')
+      dot.circle(x * YmToPx, y * YmToPx, 0.4 * YmToPx)
+    })
+    dot.fill({ color: '#dc2626' })
+    dot.stroke({ color: '#ffffff', width: 1.5 })
+    dot.zIndex = 100
+    container.addChild(dot)
+
+    const roleParams: { type: RoleType | CombinedRoleType; tag: string; p: Coordinates }[] = [
+      { type: 'tank|healer', tag: '', p: { r: 11.5, deg: 45 } },
+      { type: 'melee', tag: 'D1', p: addCoordinates(positions[0], { x: -2, y: -1 }) },
+      { type: 'dps', tag: 'D2', p: addCoordinates(positions[1], { x: -1, y: -2 }) },
+      { type: 'ranged', tag: 'D3', p: addCoordinates(positions[2], { x: -1.25, y: 1.25 }) },
+      { type: 'magic', tag: 'D4', p: addCoordinates(positions[3], { x: 1.25, y: -1.25 }) },
+    ]
+    roleParams.forEach((r) => {
+      const role = createRoleIcon(r.type, r.tag)
+      role.scale.set(0.4 * 0.78)
+      role.rotation = degToRad(-45)
+      role.position = scaleCoordinates(convertCoordinates(r.p, 'cartesian'), YmToPx)
+      container.addChild(role)
+    })
+
+    container.rotation = degToRad(45)
+
+    c.addChild(container)
+
+    const circleRadius = 15.1 * YmToPx * 1.2
+
+    const circle = new Graphics() // 为了撑开图片，以场地为中心
+    circle.circle(0, 0, circleRadius)
+    circle.fill({ color: 'white', alpha: 0 })
+    c.addChild(circle)
+
+    const circleMask = new Graphics() // 遮罩
+    circleMask.circle(0, 0, circleRadius)
+    circleMask.fill({ color: 'white' })
+    c.mask = circleMask
+    c.addChild(circleMask)
+
+    // take screenshot
+    await new Promise((resolve) => setTimeout(resolve, 1000))
+    const url = await app.renderer.extract.base64(app.stage)
+    const screenshot = document.createElement('a')
+    document.body.append(screenshot)
+    screenshot.style.position = 'fixed'
+    screenshot.style.top = '20px'
+    screenshot.style.right = '20px'
+    screenshot.download = name
+    screenshot.href = url
+    const image = new Image()
+    image.width = app.screen.width / 4
+    image.src = url
+    screenshot.innerHTML = image.outerHTML
+  })
+</script>
