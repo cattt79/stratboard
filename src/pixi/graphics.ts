@@ -96,3 +96,23 @@ export function createXGraphics(width: number, length: number, style?: FillInput
   x.rotation = Math.PI / 4
   return x
 }
+
+export function createRingFanGraphics(
+  innerRadius: number,
+  outerRadius: number,
+  angle: number,
+  style?: FillInput,
+  resolution = DEFAULT_AOE_RESOLUTION,
+) {
+  const resFactor = YmToPx * resolution
+  const start = (-angle * Math.PI) / 360
+  const end = (angle * Math.PI) / 360
+
+  const g = new Graphics()
+    .arc(0, 0, outerRadius * resFactor, start, end)
+    .arc(0, 0, innerRadius * resFactor, end, start, true)
+    .closePath()
+    .fill(style)
+
+  return g
+}
