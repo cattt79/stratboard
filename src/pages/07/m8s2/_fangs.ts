@@ -28,7 +28,7 @@ function getDirectionSign(i: number, pattern: number): { x: number; y: number } 
   return {
     x: (-1) ** pattern,
     y: (-1) ** (2 * i + 1) * (-1) ** pattern,
-  } // 0 => 左，1 => 右
+  } // 0 => 右，1 => 左
 }
 
 // 以南侧为基准，pattern 0是右边激活，pattern 1是左边激活
@@ -54,7 +54,7 @@ export async function addFangs(
   const fangs = new Container()
 
   // apply random left/right, default as 0
-  const patternArr = random
+  const patternArr: number[] = random
     ? Array.from({ length: 5 }, () => Math.random() < 0.5 ? 0 : 1)
     : patterns
 
@@ -72,8 +72,8 @@ export async function addFangs(
     fang.rotation = radian - unitRad
     const p_adjust = convertCoordinates({ r: radius + 8, rad: radian + unitRad / 4 }, 'cartesian')
     fang.position.set(
-      (p_adjust.x - dir.x * fangAdjust * Math.sin(radian + unitRad / 4)) * YmToPxLarge,
-      (p_adjust.y - dir.y * fangAdjust * Math.cos(radian + unitRad / 4)) * YmToPxLarge,
+      (p_adjust.x + dir.x * fangAdjust * Math.sin(radian + unitRad / 4)) * YmToPxLarge,
+      (p_adjust.y + dir.y * fangAdjust * Math.cos(radian + unitRad / 4)) * YmToPxLarge,
     )
     fangs.addChild(fang)
 
@@ -88,8 +88,8 @@ export async function addFangs(
       fang.rotation = radian - unitRad
       const p_adjust = convertCoordinates({ r: radius + 8, rad: radian + unitRad / 4 }, 'cartesian')
       fang.position.set(
-        (p_adjust.x + dir.x * fangAdjust * Math.sin(radian + unitRad / 4)) * YmToPxLarge,
-        (p_adjust.y + dir.y * fangAdjust * Math.cos(radian + unitRad / 4)) * YmToPxLarge,
+        (p_adjust.x - dir.x * fangAdjust * Math.sin(radian + unitRad / 4)) * YmToPxLarge,
+        (p_adjust.y - dir.y * fangAdjust * Math.cos(radian + unitRad / 4)) * YmToPxLarge,
       )
       fangs.addChild(fang)
     }
@@ -114,8 +114,8 @@ export async function addFangs(
       const prCoor = convertCoordinates(c, 'polar-radian')
       const dir = getDirectionSign(i, patternArr[i])
       c.position.set(
-        c.position.x - dir.x * fangAdjust * Math.sin(prCoor.rad) * YmToPxLarge,
-        c.position.y - dir.y * fangAdjust * Math.cos(prCoor.rad) * YmToPxLarge,
+        c.position.x + dir.x * fangAdjust * Math.sin(prCoor.rad) * YmToPxLarge,
+        c.position.y + dir.y * fangAdjust * Math.cos(prCoor.rad) * YmToPxLarge,
       )
     })
 
