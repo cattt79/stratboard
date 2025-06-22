@@ -45,7 +45,7 @@ export async function addFangs(
   const {
     multiplefangs = options.multiplefangs ?? false,
     activate = options.activate ?? false,
-    patterns = options.patterns ?? Array.from({ length: 5 }).fill(0),
+    patterns = options.patterns ?? Array.from({ length: 5 }, () => 0),
     random = options.random ?? false,
     aoeColor = options.aoeColor ?? AOE_COLORS.default,
   } = options
