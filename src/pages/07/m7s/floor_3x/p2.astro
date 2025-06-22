@@ -13,9 +13,9 @@ import StratBoard from '@/components/StratBoard.astro'
 
   import { $stratBoards } from '@/stores/stratBoards'
 
-  import floor_img from '/raw/m7s/floor_p2_4.png?url'
+  import floor_img from '/raw/m7s/floor_p2_6.png?url'
 
-  const name = 'floor_p2_4@3x'
+  const name = 'floor_p2_wall_1@3x'
 
   listenKeys($stratBoards, ['stratboard'], async (stratBoards) => {
     const app = stratBoards.stratboard
@@ -24,16 +24,34 @@ import StratBoard from '@/components/StratBoard.astro'
     container.position.set(app.screen.width / 2, app.screen.height / 2)
     app.stage.addChild(container)
 
+    // const floorTexture = await Assets.load(floor_img)
+    // const floor = Sprite.from(floorTexture)
+    // floor.anchor.set(0.5, 0.5)
+    // container.addChild(floor)
+
+    // const rectMask = new Graphics()
+    // const width = 1974 // 40/1576 50/1970
+    // const height = 984
+    // rectMask.rect(-width / 2 + 0.5, -height / 2, width, height)
+    // rectMask.fill({ color: 'white' })
+    // container.mask = rectMask
+    // container.addChild(rectMask)
+
+    // P2 wall
+
     const floorTexture = await Assets.load(floor_img)
     const floor = Sprite.from(floorTexture)
-    floor.anchor.set(0.5, 0.5)
+    floor.anchor.set(0.4975, 0.5)
+    floor.scale.set(1.02)
     container.addChild(floor)
 
     const rectMask = new Graphics()
-    const width = 1974 // 40/1576 50/1970
-    const height = 984
+    const width = 1974 + 500 // 40/1576 50/1970
+    const height = 984 + 500
     rectMask.rect(-width / 2 + 0.5, -height / 2, width, height)
     rectMask.fill({ color: 'white' })
+    rectMask.rect(-(width - 500) / 2 + 0.5, -(height - 500) / 2, width - 500, height - 500)
+    rectMask.cut()
     container.mask = rectMask
     container.addChild(rectMask)
 
