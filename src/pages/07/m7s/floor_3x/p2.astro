@@ -37,6 +37,22 @@ import StratBoard from '@/components/StratBoard.astro'
     container.mask = rectMask
     container.addChild(rectMask)
 
+    // P2_6
+
+    // const floorTexture = await Assets.load(floor_img)
+    // const floor = Sprite.from(floorTexture)
+    // floor.anchor.set(0.4975, 0.5)
+    // floor.scale.set(1.03)
+    // container.addChild(floor)
+
+    // const rectMask = new Graphics()
+    // const width = 1974 + 500 // 40/1576 50/1970
+    // const height = 984 + 500
+    // rectMask.rect(-width / 2 + 0.5, -height / 2, width, height)
+    // rectMask.fill({ color: 'white' })
+    // container.mask = rectMask
+    // container.addChild(rectMask)
+
     // take screenshot
     await new Promise((resolve) => setTimeout(resolve, 1000))
     const url = await app.renderer.extract.base64(app.stage)
