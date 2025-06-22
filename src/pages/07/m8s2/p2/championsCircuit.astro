@@ -18,7 +18,8 @@ import StratBoard from '@/components/StratBoard.astro'
   import { getScale, YmToPx } from '@/pixi/scale'
   import { $stratBoards } from '@/stores/stratBoards'
 
-  import active_fang from '/assets/07/m8s1/adds/gleaming_fang_1.png?url'
+  import { addFangs } from '../_fangs'
+
   import floor_img from '/assets/07/m8s2/floor_2@3x.png?url'
 
   const name = 'championsCircuit'
@@ -51,11 +52,11 @@ import StratBoard from '@/components/StratBoard.astro'
       { r: 17.54 * YmToPxLarge, rad: (-3 * Math.PI) / 10 },
     ]
 
-    function rotateArray<T>(arr: T[], offset: number = 1) {
-      const len = arr.length
-      const n = ((offset % len) + len) % len
-      return arr.slice(n).concat(arr.slice(0, n))
-    }
+    // function rotateArray<T>(arr: T[], offset: number = 1) {
+    //   const len = arr.length
+    //   const n = ((offset % len) + len) % len
+    //   return arr.slice(n).concat(arr.slice(0, n))
+    // }
 
     function generateAoes(aoePos: { r: number; rad: number }[], scale: number = 1.25) {
       // aoe ring
@@ -101,64 +102,32 @@ import StratBoard from '@/components/StratBoard.astro'
     }
 
     // 浮游炮
-    const fangsContainer = new Container()
-    const activeFangTexture = await Assets.load(active_fang)
-    aoePos.map((coor) => {
-      const pos = polarRadianToCartesian(coor)
+    container.addChild(
+      await addFangs(app, { multiplefangs: true, activate: true, random: true, aoeColor: AOE_COLORS.tailwind.emerald }),
+    )
 
-      const fang1 = Sprite.from(activeFangTexture)
-      fang1.scale.set(0.025)
-      fang1.rotation = coor.rad - Math.PI / 2
-      fang1.position.set(pos.x, pos.y)
-      fangsContainer.addChild(fang1)
-
-      // 计算偏移点
-      const pos2 = polarRadianToCartesian({ r: coor.r + 1.8 * YmToPxLarge, rad: coor.rad + (11 * Math.PI) / 80 })
-      const fang2 = Sprite.from(activeFangTexture)
-      fang2.scale.set(0.025)
-      fang2.rotation = coor.rad - Math.PI / 2
-      fang2.position.set(pos2.x, pos2.y)
-      fangsContainer.addChild(fang2)
-
-      return fang1
-    })
-    container.addChild(fangsContainer)
-
-    // random generator
-
-    // half-platform aoe
-    aoePos.map((coor) => {
-      const shot = AoE.createRect(4, 25, { colors: AOE_COLORS.tailwind.emerald }).toSprite(app)
-      const pos = polarRadianToCartesian(coor)
-      shot.position.set(pos.x, pos.y)
-      shot.rotation = coor.rad + Math.PI / 2
-      aoeContainer.addChild(shot)
-
-      return shot
-    })
-
-    // dynamic
-    let elapsedMS = 0
-    const interval = 4400
-    let offset = 0
     generateAoes(aoePos)
-    app.ticker.add((ticker) => {
-      elapsedMS += ticker.elapsedMS
+    // dynamic
+    // let elapsedMS = 0
+    // const interval = 4400
+    // let offset = 0
+    // app.ticker.add((ticker) => {
+    //   elapsedMS += ticker.elapsedMS
 
-      if (elapsedMS >= interval / 2) {
-        aoeContainer.removeChildren().forEach((child) => {
-          child.destroy({ children: true, texture: true })
-        })
-      }
+    //   if (elapsedMS >= interval / 2) {
+    //     aoeContainer.removeChildren().forEach((child) => {
+    //       child.destroy({ children: true, texture: true })
+    //     })
+    //   }
 
-      if (elapsedMS >= interval) {
-        elapsedMS = 0
-        offset += 1 // 顺时针
+    //   if (elapsedMS >= interval) {
+    //     elapsedMS = 0
+    //     offset += 1 // 顺时针
 
-        const pos = rotateArray(aoePos, offset)
-        generateAoes(pos)
-      }
-    })
+    //     const pos = rotateArray(aoePos, offset)
+    //     generateAoes(pos)
+    //   }
+    // })
 
     // take screenshot
     await new Promise((resolve) => setTimeout(resolve, 1000))
