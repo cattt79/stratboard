@@ -39,7 +39,7 @@ import StratBoard from '@/components/StratBoard.astro'
     floor.scale.set(getScale(50, 0.78))
     container.addChild(floor)
 
-    await setWaymark(container, waymarkData, 0.65)
+    await setWaymark(container, waymarkData, 0.65, 1)
 
     const params2 = [
       { p: { r: 3, deg: -135 }, rotation: 45 },
@@ -53,11 +53,13 @@ import StratBoard from '@/components/StratBoard.astro'
       const aoe = AoE.createRect(6, 40, AOE_PRESET.style_2).toSprite(app)
       aoe.position = p
       aoe.rotation = rotation
+      aoe.zIndex = 0
       container.addChild(aoe)
 
       const fang = await createFang('2')
       fang.position = p
       fang.rotation = rotation
+      fang.zIndex = 2
       container.addChild(fang)
     }
 
