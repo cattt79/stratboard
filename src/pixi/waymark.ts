@@ -89,7 +89,7 @@ export class Waymark extends Container {
   }
 }
 
-export async function setWaymark(container: Container, payload: WaymarkData, alpha = 1) {
+export async function setWaymark(container: Container, payload: WaymarkData, alpha = 1, zIndex = 0) {
   const waymarks = new Map<WaymarkType, Waymark>()
   for (const key in payload) {
     const k = key as WaymarkType
@@ -99,6 +99,7 @@ export async function setWaymark(container: Container, payload: WaymarkData, alp
     waymark.position.set(v.X * YmToPx, v.Z * YmToPx)
     waymark.alpha = v.alpha ?? alpha
     waymark.fgSprite!.rotation = v.rotation ?? 0
+    waymark.zIndex = zIndex
     container.addChild(waymark)
     waymarks.set(k, waymark)
   }

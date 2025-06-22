@@ -11,12 +11,11 @@ import StratBoard from '@/components/StratBoard.astro'
 
 <script>
   import { listenKeys } from 'nanostores'
-  import { Assets, Container, Graphics, Sprite } from 'pixi.js'
+  import { Assets, Container, Sprite } from 'pixi.js'
 
   import type { RoleType } from '@/lib/role'
   import type { PolarRadianCoordinates } from '@/pixi/coordinates'
 
-  import { AoE } from '@/pixi/aoe'
   import { convertCoordinates } from '@/pixi/coordinates'
   import { Role } from '@/pixi/role'
   import { getScale, YmToPx } from '@/pixi/scale'
@@ -24,7 +23,7 @@ import StratBoard from '@/components/StratBoard.astro'
 
   import { addFangs } from '../_fangs.ts'
 
-  import floor_img from '/assets/07/m8s2/floor_4@3x.png?url'
+  import floor_img from '/assets/07/m8s2/floor_2@3x.png?url'
   import skywardLeap from '/assets/07/m8s2/skyward_leap.png?url'
 
   const name = 'demo'
@@ -67,7 +66,7 @@ import StratBoard from '@/components/StratBoard.astro'
     // container.mask = circleMask
     // container.addChild(circleMask)
 
-    container.addChild(await addFangs(app, false, false, 0))
+    container.addChild(await addFangs(app, false, true, 0))
 
     // const roleParams: { type: RoleType; tag: string, x: number; y: number}[] = [
     //   { type: 'healer', tag: 'H1', x: -17.54 * Math.sin(radianSW) + 5, y: 17.54 * Math.cos(radianSW) + 1},
@@ -81,38 +80,6 @@ import StratBoard from '@/components/StratBoard.astro'
     // ]
 
     const skywardLeapParams = [roleParams[0], roleParams[1], roleParams[2], roleParams[6], roleParams[7]]
-
-    // create position of each rect
-    const rects = []
-    for (let i = 0; i < 5; i++) {
-      const p = {
-        x: -17.54 * 1.25 * Math.sin((2 * i * Math.PI) / 5),
-        y: 17.54 * 1.25 * Math.cos((2 * i * Math.PI) / 5),
-      }
-      rects.push({ position: p, rotation: Math.atan2(p.y - 0, p.x - 0) * (180 / Math.PI) - 90 })
-    }
-
-    const aoe = AoE.createRects(app, rects, 8 * 1.25, 16 * 1.25)
-    aoe.children.forEach((c, i) => {
-      const angle = Math.atan2(c.position.y - 0, c.position.x - 0)
-      // 算不明白的第五个，第五个会跟其他四个反着
-      // 很邪门，一样的计算方式浮游炮平移是对的，但是在aoe上最后一个就是错的
-      // 大概写的有点丑陋（能跑
-      c.position.set(
-        c.position.x + (i === 4 ? -1 : (-1) ** i) * 4 * Math.sin(angle) * YmToPxLarge,
-        c.position.y + (i === 4 ? 1 : (-1) ** (i + 1)) * 4 * Math.cos(angle) * YmToPxLarge,
-      )
-    })
-
-    const mask = new Graphics()
-    for (let i = 0; i < 5; i++) {
-      const r = (2 * i * Math.PI) / 5
-      mask.circle(-17.54 * YmToPxLarge * Math.sin(r), 17.54 * YmToPxLarge * Math.cos(r), 8 * YmToPxLarge)
-    }
-    mask.fill({ color: 'white' })
-    aoe.mask = mask
-    aoe.addChild(mask)
-    container.addChild(aoe)
 
     roleParams.forEach((r) => {
       const role = new Role(r.type, r.tag)
