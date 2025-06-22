@@ -1,0 +1,97 @@
+---
+import Layout from '@/layouts/Layout.astro'
+import StratBoard from '@/components/StratBoard.astro'
+---
+
+<Layout title="M8S1">
+  <div class="flex h-screen w-screen items-center justify-center">
+    <StratBoard key="stratboard" canvasClass="h-full w-full" />
+  </div>
+</Layout>
+
+<script>
+  import { listenKeys } from 'nanostores'
+  import { Assets, Container, Graphics, Sprite } from 'pixi.js'
+
+  import { AoE, AOE_PRESET } from '@/pixi/aoe'
+  import { convertCoordinates, degToRad, scaleCoordinates } from '@/pixi/coordinates'
+  import { createRoleIcon } from '@/pixi/role'
+  import { getScale, YmToPx } from '@/pixi/scale'
+  import { setWaymark } from '@/pixi/waymark'
+  import { $stratBoards } from '@/stores/stratBoards'
+
+  import { create_wolf } from '../_adds'
+  import { createTargetRing } from '../_target'
+  import { waymarkData } from '../_waymark'
+
+  import floor_img from '/assets/07/m8s1/floor_1@3x.png?url'
+
+  const name = 'solution_11'
+
+  listenKeys($stratBoards, ['stratboard'], async (stratBoards) => {
+    const app = stratBoards.stratboard
+
+    const container = new Container()
+    container.position.set(app.screen.width / 2, app.screen.height / 2)
+    app.stage.addChild(container)
+
+    const floorTexture = await Assets.load(floor_img)
+    const floor = Sprite.from(floorTexture)
+    floor.anchor.set(0.5, 0.5)
+    floor.scale.set(getScale(50, 0.78))
+    container.addChild(floor)
+
+    await setWaymark(container, waymarkData, 0.65, 1)
+
+    const targetRing = await createTargetRing()
+    targetRing.zIndex = 1
+    container.addChild(targetRing)
+
+    const R = 6 * Math.SQRT2
+
+    for (let i = 0; i < 5; i++) {
+      const deg = -90 + 72 * i + 36
+      const p = scaleCoordinates(convertCoordinates({ r: R, deg }, 'cartesian'), YmToPx)
+
+      const aoe = AoE.createRay(8, 40, AOE_PRESET.style_4).toSprite(app)
+      aoe.position = p
+      aoe.rotation = degToRad(deg + 180)
+      aoe.zIndex = 0
+      container.addChild(aoe)
+
+      const wolfOfWind = await create_wolf('wind')
+      wolfOfWind.rotation = degToRad(deg + 90)
+      wolfOfWind.position = p
+      wolfOfWind.zIndex = 2
+      container.addChild(wolfOfWind)
+    }
+
+    const role = createRoleIcon('all', '')
+    role.scale.set(0.4 * 0.78)
+    role.position = scaleCoordinates(convertCoordinates({ r: 11.5, deg: -90 + 36 }, 'cartesian'), YmToPx)
+    role.zIndex = 3
+    container.addChild(role)
+
+    const circleMask = new Graphics()
+    const circleRadius = 15.1 * YmToPx
+    circleMask.circle(0, 0, circleRadius)
+    circleMask.fill({ color: 'white' })
+    container.mask = circleMask
+    container.addChild(circleMask)
+
+    // take screenshot
+    await new Promise((resolve) => setTimeout(resolve, 1000))
+    const url = await app.renderer.extract.base64(app.stage)
+    const screenshot = document.createElement('a')
+    document.body.append(screenshot)
+    screenshot.style.position = 'fixed'
+    screenshot.style.top = '20px'
+    screenshot.style.right = '20px'
+    screenshot.download = name
+    screenshot.href = url
+    const image = new Image()
+    image.width = app.screen.width / 4
+    image.src = url
+    screenshot.innerHTML = image.outerHTML
+  })
+</script>
