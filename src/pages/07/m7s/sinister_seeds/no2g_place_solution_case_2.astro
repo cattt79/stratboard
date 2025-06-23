@@ -13,6 +13,8 @@ import StratBoard from '@/components/StratBoard.astro'
   import { listenKeys } from 'nanostores'
   import { Assets, Container, Graphics, Sprite } from 'pixi.js'
 
+  import type { RoleType } from '@/lib/role'
+
   import { AoE } from '@/pixi/aoe'
   import { drawArrow } from '@/pixi/arrow'
   import { getScale, YmToPx, YmToPxMap } from '@/pixi/scale'
@@ -25,7 +27,7 @@ import StratBoard from '@/components/StratBoard.astro'
   import target_ring_img from '/assets/target_ring/r5@3x.png?url'
   import lock_on_img from '/game/vfx/lockon/eff/lockon5_t0h@3x.png?url'
 
-  const name = 'g8g_place_solution_case_2'
+  const name = 'no2g_place_solution_case_2'
 
   listenKeys($stratBoards, ['stratboard'], async (stratBoards) => {
     const app = stratBoards.stratboard
@@ -41,8 +43,8 @@ import StratBoard from '@/components/StratBoard.astro'
     container.addChild(floor)
 
     const aoeParams: { x: number; y: number }[] = [
-      { x: -5, y: 5 },
-      { x: 5, y: 5 },
+      { x: -8, y: 8 },
+      { x: 0, y: 8 },
       { x: 0, y: 0 },
       { x: 0, y: -6 },
     ]
@@ -90,43 +92,23 @@ import StratBoard from '@/components/StratBoard.astro'
     targetRing.rotation = 0
     container.addChild(targetRing)
 
-    // 近战组
-    const D1 = new Role('melee', 'D1')
-    D1.scale.set(0.4)
-    D1.position.set(-1.1 * YmToPx, -7 * YmToPx)
-    container.addChild(D1)
-    const D2 = new Role('dps', 'D2')
-    D2.scale.set(0.4)
-    D2.position.set(1.1 * YmToPx, -7 * YmToPx)
-    container.addChild(D2)
-    const MT = new Role('tank', 'MT')
-    MT.scale.set(0.4)
-    MT.position.set(-1.1 * YmToPx, -9.5 * YmToPx)
-    container.addChild(MT)
-    const ST = new Role('tank', 'ST')
-    ST.scale.set(0.4)
-    ST.position.set(1.1 * YmToPx, -9.5 * YmToPx)
-    container.addChild(ST)
+    const roleParam: { type: RoleType; tag: string; x: number; y: number }[] = [
+      { type: 'ranged', tag: 'D3', x: -1.1, y: -7.3 },
+      { type: 'magic', tag: 'D4', x: 1.1, y: -7.3 },
+      { type: 'healer', tag: 'H1', x: -1.1, y: -9.8 },
+      { type: 'healer', tag: 'H2', x: 1.1, y: -9.8 },
+      { type: 'tank', tag: 'MT', x: -9, y: -9 },
+      { type: 'tank', tag: 'ST', x: 9, y: -9 },
+      { type: 'melee', tag: 'D1', x: -9, y: 9 },
+      { type: 'dps', tag: 'D2', x: 9, y: 9 },
+    ]
 
-    // D3D4
-    const D3 = new Role('ranged', 'D3')
-    D3.scale.set(0.4)
-    D3.position.set(-9 * YmToPx, -9 * YmToPx)
-    container.addChild(D3)
-    const D4 = new Role('magic', 'D4')
-    D4.scale.set(0.4)
-    D4.position.set(9 * YmToPx, -9 * YmToPx)
-    container.addChild(D4)
-
-    // H1H2
-    const H1 = new Role('healer', 'H1')
-    H1.scale.set(0.4)
-    H1.position.set(-9 * YmToPx, 9 * YmToPx)
-    container.addChild(H1)
-    const H2 = new Role('healer', 'H2')
-    H2.scale.set(0.4)
-    H2.position.set(9 * YmToPx, 9 * YmToPx)
-    container.addChild(H2)
+    roleParam.forEach((r) => {
+      const role = new Role(r.type, r.tag)
+      role.scale.set(0.4)
+      role.position.set(r.x * YmToPx, r.y * YmToPx)
+      container.addChild(role)
+    })
 
     drawArrow(container, aoeParams[0], aoeParams[1], 0xffffff, 0.4, 1.5)
     drawArrow(container, aoeParams[1], aoeParams[2], 0xffffff, 0.4, 1.5)

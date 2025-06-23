@@ -23,8 +23,8 @@ import StratBoard from '@/components/StratBoard.astro'
   import { waymarkDataDB } from '../_waymark'
 
   import floor_img from '/assets/07/m7s/floor_p2_2@3x.png?url'
-  import wall_img from '/assets/07/m7s/wall/wall_2.png?url'
-  import chn_img from '/game/vfx/channeling/eff/chn_m0935dg2_c0p@3x.png?url'
+  import new_wall_img from '/assets/07/m7s/floor_p2_wall_1@3x.png?url'
+  import chn_img from '/game/vfx/channeling/eff/chn_thorn_fix@3x.png?url'
   import flare_img from '/game/vfx/lockon/eff/flare_aoe.png?url'
 
   const name = 'AbBlink_flare2'
@@ -45,36 +45,23 @@ import StratBoard from '@/components/StratBoard.astro'
     await setWaymark(container, waymarkDataDB, 0.65)
 
     // 墙体
-    const rectParam = { w: 205, h: 45, color: 0x2e8b57 }
-    const wallRect = [
-      { x: -31, y: 0, w: rectParam.h, h: rectParam.w, r: -Math.PI / 2 }, // 左
-      { x: -12, y: -18, w: rectParam.w, h: rectParam.h, r: 0 }, // 上
-      { x: 12, y: 18, w: rectParam.w, h: rectParam.h, r: Math.PI }, // 下
+    const new_wall_texture = await Assets.load(new_wall_img)
+    const new_wall = Sprite.from(new_wall_texture)
+    new_wall.anchor.set(0.5, 0.5)
+    new_wall.scale.set(getScale())
+    container.addChild(new_wall)
+
+    const wallPos = [
+      { x: -30, y: 0 }, // 左
+      { x: -12, y: -17 }, // 上
+      { x: 12, y: 17 }, // 下
     ]
-
-    const wall_texture = await Assets.load(wall_img)
-
-    // 墙体
-    wallRect.forEach((r) => {
-      const g = new Graphics()
-      g.rect(r.x * YmToPx - r.w / 2, r.y * YmToPx - r.h / 2, r.w, r.h)
-      g.fill(rectParam.color)
-      container.addChild(g)
-
-      const wall = new Sprite(wall_texture)
-      wall.anchor.set(0.5, 0.5)
-      wall.position.set(r.x * YmToPx, r.y * YmToPx)
-      wall.rotation = r.r
-      wall.height = 40
-      wall.width = 200
-      container.addChild(wall)
-    })
 
     // 角色图标
     const roleParam: { type: RoleType; x: number; y: number; a: number }[] = [
-      { type: 'tank', x: -23.75, y: 11.25, a: 1 },
+      { type: 'tank', x: -23.5, y: 11.25, a: 1 },
       { type: 'all', x: -21, y: -11.25, a: 1 },
-      { type: 'tank', x: -23.75, y: -11.25, a: 1 },
+      { type: 'tank', x: -23.5, y: -11.25, a: 1 },
     ]
 
     // 角色图标
@@ -87,20 +74,20 @@ import StratBoard from '@/components/StratBoard.astro'
     container.addChild(flare)
 
     const flareTank = new Role(roleParam[0].type)
-    flareTank.scale.set(0.4)
+    flareTank.scale.set(0.5)
     flareTank.position.set(roleParam[0].x * YmToPx, roleParam[0].y * YmToPx)
     flareTank.alpha = roleParam[0].a
     container.addChild(flareTank)
 
     const chnTank = new Role(roleParam[2].type)
-    chnTank.scale.set(0.4)
+    chnTank.scale.set(0.5)
     chnTank.position.set(roleParam[2].x * YmToPx, roleParam[2].y * YmToPx)
     chnTank.alpha = roleParam[2].a
     container.addChild(chnTank)
     // 连线
     const chnTexture = await Assets.load(chn_img)
     const p1 = { x: roleParam[2].x * YmToPx, y: roleParam[2].y * YmToPx }
-    const p2 = { x: wallRect[0].x * YmToPx, y: wallRect[0].y * YmToPx }
+    const p2 = { x: wallPos[0].x * YmToPx, y: wallPos[0].y * YmToPx }
 
     const dx = p2.x - p1.x
     const dy = p2.y - p1.y
@@ -109,14 +96,14 @@ import StratBoard from '@/components/StratBoard.astro'
 
     const chn = new Sprite(chnTexture)
     chn.anchor.set(0, 0.5)
-    chn.position.set(p2.x - 2 * YmToPx, p2.y + 3 * YmToPx)
+    chn.position.set(p2.x, p2.y)
     chn.rotation = angle + Math.PI
-    chn.width = len * 1.4
-    chn.height = 5 * YmToPx
+    chn.width = len
+    chn.height = 4 * YmToPx
     container.addChild(chn)
 
     const role = new Role(roleParam[1].type)
-    role.scale.set(0.4)
+    role.scale.set(0.5)
     role.position.set(roleParam[1].x * YmToPx, roleParam[1].y * YmToPx)
     role.alpha = roleParam[1].a
     container.addChild(role)

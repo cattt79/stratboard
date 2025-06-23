@@ -14,15 +14,16 @@ import StratBoard from '@/components/StratBoard.astro'
   import { Assets, Container, Graphics, Sprite } from 'pixi.js'
 
   import { AoE } from '@/pixi/aoe'
+  import { drawArrow } from '@/pixi/arrow'
   import { getScale, YmToPx, YmToPxMap } from '@/pixi/scale'
   import { $stratBoards } from '@/stores/stratBoards'
 
   import { Role } from '../../../../pixi/role'
-  import { drawArrow } from '../pollen/_draw_arrow'
 
   import floor_img from '/assets/07/m7s/floor_p1_1@3x.png?url'
   import omen_img from '/assets/fan/360_r20_purple@3x.png?url'
-  import lock_on_img from '/assets/game/vfx/lockon/eff/lockon5_t0h@3x.png?url'
+  import target_ring_img from '/assets/target_ring/r5@3x.png?url'
+  import lock_on_img from '/game/vfx/lockon/eff/lockon5_t0h@3x.png?url'
 
   const name = 'g8g_place_solution_case_2'
 
@@ -81,6 +82,14 @@ import StratBoard from '@/components/StratBoard.astro'
       container.addChild(lock_on_sprite)
     })
 
+    const targetRingTexture = await Assets.load(target_ring_img)
+    const targetRing = Sprite.from(targetRingTexture)
+    targetRing.anchor.set(0.5, 0.5)
+    targetRing.position.set(0, -0.8 * YmToPx)
+    targetRing.scale.set(1.4)
+    targetRing.rotation = 0
+    container.addChild(targetRing)
+
     // 近战组
     const D1 = new Role('melee', 'D1')
     D1.scale.set(0.4)
@@ -119,9 +128,9 @@ import StratBoard from '@/components/StratBoard.astro'
     H2.position.set(9 * YmToPx, 9 * YmToPx)
     container.addChild(H2)
 
-    drawArrow(container, aoeParams[0], aoeParams[1], 0xffffff, 0.95)
-    drawArrow(container, aoeParams[1], aoeParams[2], 0xffffff, 0.95)
-    drawArrow(container, aoeParams[2], aoeParams[3], 0xffffff, 0.95)
+    drawArrow(container, aoeParams[0], aoeParams[1], 0xffffff, 0.4, 1.5)
+    drawArrow(container, aoeParams[1], aoeParams[2], 0xffffff, 0.4, 1.5)
+    drawArrow(container, aoeParams[2], aoeParams[3], 0xffffff, 0.4, 1.5)
 
     // take screenshot
     await new Promise((resolve) => setTimeout(resolve, 1000))
