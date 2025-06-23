@@ -13,8 +13,8 @@ interface Props {
 
 const {
   key,
-  width = 864,
-  height = 864,
+  width = 1000,
+  height = 1000,
   resolution = 0,
   class: className = '',
   canvasClass = '',
@@ -23,7 +23,7 @@ const {
 ---
 
 <strat-board data-key={key} data-resolution={resolution} class={className} {...rest}>
-  <canvas width={width} height={height} class={cn('w-216 h-216', canvasClass)}> </canvas>
+  <canvas width={width} height={height} class={cn('w-250 h-250', canvasClass)}> </canvas>
 </strat-board>
 
 <script>
@@ -74,7 +74,7 @@ const {
         //    this.dataset.resolution === '0'
         //    ? window.devicePixelRatio || 1
         //    : Number.parseInt(this.dataset.resolution ?? '1'),
-        resolution: 2,
+        resolution: 3,
         backgroundAlpha: 0,
         preference: 'webgpu',
         antialias: true,

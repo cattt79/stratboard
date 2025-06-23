@@ -1,0 +1,149 @@
+---
+import Layout from '@/layouts/Layout.astro'
+import StratBoard from '@/components/StratBoard.astro'
+---
+
+<Layout title="M8S1">
+  <div class="flex h-screen w-screen items-center justify-center">
+    <StratBoard key="stratboard" canvasClass="h-full w-full" />
+  </div>
+</Layout>
+
+<script>
+  import { listenKeys } from 'nanostores'
+  import { Assets, Container, Graphics, Sprite } from 'pixi.js'
+
+  import type { CombinedRoleType, RoleType } from '@/lib/role'
+
+  import { AoE, AOE_PRESET } from '@/pixi/aoe'
+  import { addCoordinates, convertCoordinates, degToRad, scaleCoordinates } from '@/pixi/coordinates'
+  import { createRoleIcon } from '@/pixi/role'
+  import { getScale, YmToPx } from '@/pixi/scale'
+  import { setWaymark } from '@/pixi/waymark'
+  import { $stratBoards } from '@/stores/stratBoards'
+
+  import { createBoss } from '../_boss'
+  import { waymarkData } from '../_waymark'
+
+  import floor_img from '/assets/07/m8s1/floor_1@3x.png?url'
+  import stack_img from '/game/vfx/lockon/eff/com_share4a1@3x.png?url'
+  import lockon_img from '/game/vfx/lockon/eff/lockon5_t0h@3x.png?url'
+
+  const name = 'solution_8'
+
+  listenKeys($stratBoards, ['stratboard'], async (stratBoards) => {
+    const app = stratBoards.stratboard
+
+    const container = new Container()
+    container.position.set(app.screen.width / 2, app.screen.height / 2)
+    app.stage.addChild(container)
+
+    const zIndexMap = {
+      floor: 0,
+      line: 5,
+      waymark: 10,
+      spread: 15,
+      stack: 15,
+      role: 20,
+      lockon: 25,
+    }
+
+    const floorTexture = await Assets.load(floor_img)
+    const floor = Sprite.from(floorTexture)
+    floor.anchor.set(0.5, 0.5)
+    floor.scale.set(getScale(50, 0.78))
+    floor.zIndex = zIndexMap.floor
+    container.addChild(floor)
+
+    await setWaymark(container, waymarkData, 0.65, zIndexMap.waymark)
+
+    const roleStart = { r: 11, deg: -90 }
+    const R = 6 * Math.SQRT2
+
+    for (let i = 0; i < 5; i++) {
+      const deg = roleStart.deg + 72 * i
+      const p = scaleCoordinates(convertCoordinates({ r: R, deg }, 'cartesian'), YmToPx)
+
+      const aoe = AoE.createRay(8, 40, AOE_PRESET.style_2).toSprite(app)
+      aoe.position = p
+      aoe.rotation = degToRad(deg + 180)
+      aoe.zIndex = zIndexMap.line
+      container.addChild(aoe)
+
+      const boss = await createBoss()
+      boss.position = p
+      boss.zIndex = zIndexMap.role
+      container.addChild(boss)
+    }
+
+    const roleParams: { type: RoleType | CombinedRoleType; tag: string }[] = [
+      { type: 'dps', tag: '' },
+      { type: 'tank', tag: 'ST' },
+      { type: 'healer', tag: 'H2' },
+      { type: 'healer', tag: 'H1' },
+      { type: 'tank', tag: 'MT' },
+    ]
+
+    const lockonTexture = await Assets.load(lockon_img)
+    for (let i = 1; i <= 4; i++) {
+      const r = roleStart.r
+      const deg = roleStart.deg + 72 * i
+      const p = scaleCoordinates(convertCoordinates({ r, deg }, 'cartesian'), YmToPx)
+
+      const aoe = AoE.createCircle(6, AOE_PRESET.style_3).toSprite(app)
+      aoe.position = p
+      aoe.zIndex = zIndexMap.spread
+      container.addChild(aoe)
+
+      const role = createRoleIcon(roleParams[i].type, roleParams[i].tag)
+      role.scale.set(0.4 * 0.78)
+      role.position = p
+      role.zIndex = zIndexMap.role
+      container.addChild(role)
+
+      const p1 = addCoordinates({ r, deg }, { x: 0, y: -2.25 * 0.78 })
+      const lockon = Sprite.from(lockonTexture)
+      lockon.anchor.set(0.5, 0.5)
+      lockon.position = scaleCoordinates(convertCoordinates(p1, 'cartesian'), YmToPx)
+      lockon.scale.set(0.4 * 0.78)
+      lockon.zIndex = zIndexMap.lockon
+      container.addChild(lockon)
+    }
+
+    const role = createRoleIcon(roleParams[0].type, roleParams[0].tag)
+    role.scale.set(0.4 * 0.78)
+    role.position = scaleCoordinates(convertCoordinates(roleStart, 'cartesian'), YmToPx)
+    role.zIndex = zIndexMap.role
+    container.addChild(role)
+
+    const stackTexture = await Assets.load(stack_img)
+    const stack = Sprite.from(stackTexture)
+    stack.anchor.set(0.5, 0.5)
+    stack.position = scaleCoordinates(convertCoordinates(roleStart, 'cartesian'), YmToPx)
+    stack.scale.set(getScale() * 0.5)
+    stack.zIndex = zIndexMap.stack
+    container.addChild(stack)
+
+    const circleMask = new Graphics()
+    const circleRadius = 15.1 * YmToPx
+    circleMask.circle(0, 0, circleRadius)
+    circleMask.fill({ color: 'white' })
+    container.mask = circleMask
+    container.addChild(circleMask)
+
+    // take screenshot
+    await new Promise((resolve) => setTimeout(resolve, 1000))
+    const url = await app.renderer.extract.base64(app.stage)
+    const screenshot = document.createElement('a')
+    document.body.append(screenshot)
+    screenshot.style.position = 'fixed'
+    screenshot.style.top = '20px'
+    screenshot.style.right = '20px'
+    screenshot.download = name
+    screenshot.href = url
+    const image = new Image()
+    image.width = app.screen.width / 4
+    image.src = url
+    screenshot.innerHTML = image.outerHTML
+  })
+</script>

@@ -190,7 +190,7 @@ export interface AoECreateOptions {
   outerGlowOptions?: Partial<GlowFilterOptions>
 }
 
-export type AoEType = 'rect' | 'ray' | 'circle' | 'ring' | 'fan' | 'x'
+export type AoEType = 'rect' | 'ray' | 'circle' | 'ring' | 'fan' | 'x' | 'ringFan'
 
 export class AoETexture extends Texture {
   type: AoEType
@@ -518,6 +518,24 @@ export class AoE extends Container {
       c.addChild(x)
     })
     return c
+  }
+
+  /**
+   * 创建部分的环形AoE效果
+   */
+  static createRingFan(innerRadius: number, outerRadius: number, angle: number, options: AoECreateOptions = {}): AoE {
+    const { resolution = DEFAULT_AOE_RESOLUTION } = options
+
+    const aoe = new AoE(
+      'ringFan',
+      resolution,
+      style => G.createRingFanGraphics(innerRadius, outerRadius, angle, style, resolution),
+      options.colors,
+      options.aoeAlpha,
+      options.innerShadowOptions,
+      options.outerGlowOptions,
+    )
+    return aoe
   }
 
   private getComputedRectangle() {
