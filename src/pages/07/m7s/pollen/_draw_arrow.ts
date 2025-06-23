@@ -9,7 +9,10 @@ export function drawArrow(
   from: { x: number; y: number },
   to: { x: number; y: number },
   color: number,
-  shrinkRatio: number,
+  shrinkRatio: number = 1,
+  headLength: number = 1,
+  lineWidth?: number,
+  strokeColor?: number,
 ) {
   const dx = to.x - from.x
   const dy = to.y - from.y
@@ -19,19 +22,36 @@ export function drawArrow(
   const shrinkDist = length * (1 - shrinkRatio)
   const dirX = dx / length
   const dirY = dy / length
-  const shortFrom = {
-    x: from.x + dirX * shrinkDist,
-    y: from.y + dirY * shrinkDist,
-  }
+
   const shortTo = {
     x: to.x - dirX * shrinkDist,
     y: to.y - dirY * shrinkDist,
   }
 
+  let width_of_line = 0.3
+  if (lineWidth) {
+    width_of_line = lineWidth
+  }
+
+  const lines = new Graphics()
+  lines.rect(
+    (from.x - headLength) * YmToPx,
+    (from.y - width_of_line / 2) * YmToPx,
+    length * YmToPx,
+    width_of_line * YmToPx,
+  )
+  lines.fill({ color: '#db2777' })
+  if (strokeColor) {
+    lines.stroke(strokeColor)
+  }
+  lines.pivot.set(0, 0)
+  lines.rotation = angle
+  container.addChild(lines)
+
   const arrow = new Graphics()
-  arrow.lineStyle(4, color)
-  arrow.moveTo(shortFrom.x * YmToPx, shortFrom.y * YmToPx)
-  arrow.lineTo(shortTo.x * YmToPx, shortTo.y * YmToPx)
+  // arrow.lineStyle(4, color)
+  // arrow.moveTo(shortFrom.x * YmToPx, shortFrom.y * YmToPx)
+  // arrow.lineTo(shortTo.x * YmToPx, shortTo.y * YmToPx)
 
   // 箭头头部三角形
   const arrowSize = 1.0
@@ -43,12 +63,13 @@ export function drawArrow(
   const rightX = endX - arrowSize * YmToPx * Math.cos(angle + Math.PI / 8)
   const rightY = endY - arrowSize * YmToPx * Math.sin(angle + Math.PI / 8)
 
-  arrow.beginFill(color)
   arrow.moveTo(endX, endY)
   arrow.lineTo(leftX, leftY)
   arrow.lineTo(rightX, rightY)
   arrow.closePath()
-  arrow.endFill()
-
+  if (strokeColor) {
+    arrow.stroke({ color: strokeColor, width: 2 })
+  }
+  arrow.fill(color)
   container.addChild(arrow)
 }

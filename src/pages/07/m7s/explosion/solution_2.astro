@@ -15,6 +15,7 @@ import StratBoard from '@/components/StratBoard.astro'
 
   import type { RoleType } from '@/lib/role'
 
+  import { drawArrow } from '@/pixi/arrow'
   import { Role } from '@/pixi/role'
   import { getScale, YmToPx } from '@/pixi/scale'
   import { $stratBoards } from '@/stores/stratBoards'
@@ -120,69 +121,23 @@ import StratBoard from '@/components/StratBoard.astro'
       container.addChild(sprite)
     }
 
+    const arrowParam = [
+      { x: 11.5, y: -6.5 },
+      { x: 2, y: -15 },
+    ]
+    drawArrow(container, arrowParam[0], arrowParam[1], 0xdb2777, 0.35, 1.3, 0xffffff)
+
     // 职业图标
     const roleParams: { type: RoleType; tag: string; x: number; y: number; a: number }[] = [
       { type: 'all', tag: '', x: 12, y: -6, a: 1 },
     ]
     roleParams.forEach((r) => {
       const role = new Role(r.type, r.tag)
-      role.scale.set(0.4)
+      role.scale.set(0.45)
       role.position.set(r.x * YmToPx, r.y * YmToPx)
       role.alpha = r.a
       container.addChild(role)
     })
-
-    function drawArrow(
-      from: { x: number; y: number },
-      to: { x: number; y: number },
-      color = 0xff66cc,
-      shrinkRatio = 0.92,
-    ) {
-      const dx = to.x - from.x
-      const dy = to.y - from.y
-      const angle = Math.atan2(dy, dx)
-
-      const length = Math.sqrt(dx * dx + dy * dy)
-      const shrinkDist = length * (1 - shrinkRatio)
-      const dirX = dx / length
-      const dirY = dy / length
-      const shortFrom = {
-        x: from.x + dirX * shrinkDist,
-        y: from.y + dirY * shrinkDist,
-      }
-      const shortTo = {
-        x: to.x - dirX * shrinkDist,
-        y: to.y - dirY * shrinkDist,
-      }
-
-      const arrow = new Graphics()
-      arrow.lineStyle(4, color)
-      arrow.moveTo(shortFrom.x * YmToPx, shortFrom.y * YmToPx)
-      arrow.lineTo(shortTo.x * YmToPx, shortTo.y * YmToPx)
-
-      // 箭头头部三角形
-      const arrowSize = 1.5
-      const endX = shortTo.x * YmToPx
-      const endY = shortTo.y * YmToPx
-
-      const leftX = endX - arrowSize * YmToPx * Math.cos(angle - Math.PI / 8)
-      const leftY = endY - arrowSize * YmToPx * Math.sin(angle - Math.PI / 8)
-      const rightX = endX - arrowSize * YmToPx * Math.cos(angle + Math.PI / 8)
-      const rightY = endY - arrowSize * YmToPx * Math.sin(angle + Math.PI / 8)
-
-      arrow.beginFill(color)
-      arrow.moveTo(endX, endY)
-      arrow.lineTo(leftX, leftY)
-      arrow.lineTo(rightX, rightY)
-      arrow.closePath()
-      arrow.endFill()
-
-      container.addChild(arrow)
-    }
-
-    const from = omenParams[2]
-    const to = omenParams[0]
-    drawArrow(from, to)
 
     // take screenshot
     await new Promise((resolve) => setTimeout(resolve, 1000))

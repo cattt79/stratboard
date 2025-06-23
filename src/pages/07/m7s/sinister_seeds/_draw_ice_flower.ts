@@ -8,10 +8,11 @@ export function drawIceFlower(
   container: Container<any>,
   center: { x: number; y: number },
 ) {
-  const rect1 = AoE.createRect(100, 4, { colors: AOE_COLORS.tailwind.fuchsia }).toSprite(app)
-  const rect2 = AoE.createRect(100, 4, { colors: AOE_COLORS.tailwind.fuchsia }).toSprite(app)
-  const rect3 = AoE.createRect(100, 4, { colors: AOE_COLORS.tailwind.fuchsia }).toSprite(app)
-  const rect4 = AoE.createRect(100, 4, { colors: AOE_COLORS.tailwind.fuchsia }).toSprite(app)
+  const color = AOE_COLORS.tailwind.orange
+  const rect1 = AoE.createRect(100, 4, { colors: color }).toSprite(app)
+  const rect2 = AoE.createRect(100, 4, { colors: color }).toSprite(app)
+  const rect3 = AoE.createRect(100, 4, { colors: color }).toSprite(app)
+  const rect4 = AoE.createRect(100, 4, { colors: color }).toSprite(app)
 
   const rects = [rect1, rect2, rect3, rect4]
 
