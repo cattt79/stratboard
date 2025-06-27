@@ -43,6 +43,7 @@ import StratBoard from '@/components/StratBoard.astro'
 
     // 绘制点位
     const safePoint: { x: number; y: number; width: number; height: number; color: string; radius: number }[] = [
+      { x: -34, y: -34, width: 8, height: 8, color: '#2563eb', radius: 50 },
       { x: 140.5, y: 74, width: 8, height: 8, color: '#ff751f', radius: 50 },
       { x: 210, y: -34, width: 8, height: 8, color: '#ff751f', radius: 50 },
       { x: -210, y: -34, width: 8, height: 8, color: '#ff751f', radius: 50 },
@@ -81,7 +82,6 @@ import StratBoard from '@/components/StratBoard.astro'
     // 绘制职能点位
     const roleParams: { type: CombinedRoleType | RoleType; tag: string; x: number; y: number }[] = [
       { type: 'tank|healer', tag: '', x: 0, y: -11 },
-      { type: 'tank|healer', tag: '', x: -3.4, y: -3.4 },
       { type: 'melee', tag: '', x: -23.5, y: -11 },
       { type: 'ranged', tag: 'D3', x: -23.5, y: 10.75 },
       { type: 'ranged', tag: 'D3', x: 23.5, y: -11 },
