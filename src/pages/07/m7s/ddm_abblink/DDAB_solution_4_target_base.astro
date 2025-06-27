@@ -22,12 +22,12 @@ import StratBoard from '@/components/StratBoard.astro'
 
   import { waymarkDataDB } from '../_waymark'
 
-  import floor_img from '/assets/07/m7s/floor_p2_3@3x.png?url'
+  import floor_img from '/assets/07/m7s/floor_p2_5@3x.png?url'
   import new_wall_img from '/assets/07/m7s/floor_p2_wall_1@3x.png?url'
   import chn_img from '/game/vfx/channeling/eff/chn_thorn_fix@3x.png?url'
   import flare_img from '/game/vfx/lockon/eff/flare_aoe.png?url'
 
-  const name = 'game8_abblink'
+  const name = 'DDAB_solution_4_target_base'
 
   listenKeys($stratBoards, ['stratboard'], async (stratBoards) => {
     const app = stratBoards.stratboard
@@ -42,7 +42,11 @@ import StratBoard from '@/components/StratBoard.astro'
     floor.scale.set(getScale())
     container.addChild(floor)
 
-    await setWaymark(container, waymarkDataDB, 0.65)
+    const rotation = Math.PI
+    const waymarks = await setWaymark(container, waymarkDataDB, 0.65)
+    for (const waymark of waymarks.values()) {
+      waymark.fgSprite!.rotation = rotation
+    }
 
     // 墙体
     const new_wall_texture = await Assets.load(new_wall_img)
@@ -57,54 +61,55 @@ import StratBoard from '@/components/StratBoard.astro'
       { x: 12, y: 17 }, // 下
     ]
 
-    // 角色图标
-    const roleParam: { type: RoleType; x: number; y: number; a: number }[] = [
-      { type: 'tank', x: -23.5, y: -11, a: 1 },
-      { type: 'all', x: -23.5, y: -8, a: 1 },
-      { type: 'tank', x: 20, y: 1, a: 1 },
+    // 角色位置
+    const roleParam: { type: RoleType; tag: string; x: number; y: number }[] = [
+      { type: 'ranged', tag: 'D3', x: -22, y: 2 },
+      { type: 'magic', tag: 'D4', x: -8, y: -9 },
+      { type: 'tank', tag: 'MT', x: -1.5, y: 11.5 },
+      { type: 'all', tag: '', x: -1.5, y: 8 },
+      { type: 'tank', tag: 'ST', x: 23.5, y: 11.5 },
     ]
 
-    // 连线
-    const chnTexture = await Assets.load(chn_img)
-    const p1 = { x: roleParam[0].x * YmToPx, y: roleParam[0].y * YmToPx }
-    const p2 = { x: wallPos[1].x * YmToPx, y: wallPos[1].y * YmToPx }
-    const dx = p2.x - p1.x
-    const dy = p2.y - p1.y
-    const len = Math.sqrt(dx * dx + dy * dy)
-    const angle = Math.atan2(dy, dx)
-    const chn = new Sprite(chnTexture)
-    chn.anchor.set(0, 0.5)
-    chn.position.set(p2.x, p2.y)
-    chn.rotation = angle + Math.PI
-    chn.width = len
-    chn.height = 4 * YmToPx
-    container.addChild(chn)
-
-    // 核爆
     const flareTexture = await Assets.load(flare_img)
-    const flare = new Sprite(flareTexture)
-    flare.anchor.set(0.5, 0.5)
-    flare.scale.set(getScale() / 6)
-    flare.position.set(roleParam[2].x * YmToPx, (roleParam[2].y + 1) * YmToPx)
-    container.addChild(flare)
 
-    const flareTank = new Role(roleParam[2].type)
-    flareTank.scale.set(0.5)
-    flareTank.position.set(roleParam[2].x * YmToPx, roleParam[2].y * YmToPx)
-    flareTank.alpha = roleParam[2].a
-    container.addChild(flareTank)
+    // 同时画出角色和连线
+    const chnTexture = await Assets.load(chn_img)
+    roleParam.forEach((r, i) => {
+      const role = new Role(r.type, r.tag)
+      role.scale.set(0.5)
+      role.position.set(r.x * YmToPx, r.y * YmToPx)
+      role.rotation = rotation
 
-    const chnTank = new Role(roleParam[0].type)
-    chnTank.scale.set(0.5)
-    chnTank.position.set(roleParam[0].x * YmToPx, roleParam[0].y * YmToPx)
-    chnTank.alpha = roleParam[0].a
-    container.addChild(chnTank)
+      // 连线
+      if (i <= 2) {
+        const p1 = { x: wallPos[i].x * YmToPx, y: wallPos[i].y * YmToPx }
+        const p2 = { x: roleParam[i].x * YmToPx, y: roleParam[i].y * YmToPx }
+        const dx = p2.x - p1.x
+        const dy = p2.y - p1.y
+        const len = Math.sqrt(dx * dx + dy * dy)
+        const angle = Math.atan2(dy, dx)
+        const chn = new Sprite(chnTexture)
+        chn.anchor.set(0, 0.5)
+        chn.position.set(p1.x, p1.y)
+        chn.rotation = angle
+        chn.width = len
+        chn.height = YmToPx * 4
+        container.addChild(chn)
+      }
 
-    const role = new Role(roleParam[1].type)
-    role.scale.set(0.5)
-    role.position.set(roleParam[1].x * YmToPx, roleParam[1].y * YmToPx)
-    role.alpha = roleParam[1].a
-    container.addChild(role)
+      if (r.tag === 'ST') {
+        const flare = new Sprite(flareTexture)
+        flare.anchor.set(0.5, 0.5)
+        flare.scale.set(getScale() / 6)
+        flare.position.set(r.x * YmToPx, (r.y - 1) * YmToPx)
+        flare.rotation = rotation
+        container.addChild(flare)
+      }
+
+      container.addChild(role)
+    })
+
+    container.rotation = rotation
 
     // 蒙版
     const rectMask = new Graphics()
