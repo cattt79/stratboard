@@ -1,0 +1,124 @@
+---
+import Layout from '@/layouts/Layout.astro'
+import StratBoard from '@/components/StratBoard.astro'
+---
+
+<Layout title="M7S">
+  <div class="flex h-screen w-screen items-center justify-center">
+    <StratBoard class="scale-200" key="stratboard" />
+  </div>
+</Layout>
+
+<script>
+  import { listenKeys } from 'nanostores'
+  import { Assets, Container, Graphics, Sprite, Text } from 'pixi.js'
+
+  import type { CombinedRoleType, RoleType } from '@/lib/role'
+
+  import { createRoleIcon } from '@/pixi/role'
+  import { getScale, YmToPx } from '@/pixi/scale'
+  import { setWaymark } from '@/pixi/waymark'
+  import { $stratBoards } from '@/stores/stratBoards'
+
+  import { waymarkDataDB } from '../_waymark'
+
+  import floor_img from '/assets/07/m7s/floor_p2_3@3x.png?url'
+
+  const name = 'zari_place_ranged'
+
+  listenKeys($stratBoards, ['stratboard'], async (stratBoards) => {
+    const app = stratBoards.stratboard
+
+    const container0 = new Container()
+    container0.position.set(app.screen.width / 2, app.screen.height / 2)
+    app.stage.addChild(container0)
+
+    const floorTexture = await Assets.load(floor_img)
+    const floor = Sprite.from(floorTexture)
+    floor.anchor.set(0.5, 0.5)
+    floor.scale.set(getScale())
+    container0.addChild(floor)
+
+    await setWaymark(container0, waymarkDataDB, 0.65)
+
+    const container1 = new Container()
+    container1.position.set(app.screen.width / 2, app.screen.height / 2)
+    app.stage.addChild(container1)
+
+    // 绘制职能点位
+    const roleParams: { type: CombinedRoleType | RoleType; tag: string; x: number; y: number }[] = [
+      { type: 'ranged', tag: 'D3', x: -23.75, y: 11 },
+      { type: 'ranged', tag: 'D3', x: 23.75, y: -11.2 },
+      { type: 'ranged', tag: 'D3', x: 21, y: -3.4 },
+    ]
+    roleParams.forEach((r) => {
+      const role = createRoleIcon(r.type, r.tag)
+      role.scale.set(0.35)
+      role.position.set(r.x * YmToPx, r.y * YmToPx)
+      container1.addChild(role)
+    })
+
+    const safePoint: { x: number; y: number; width: number; height: number; color: string; radius: number }[] = [
+      { x: -210, y: -34, width: 8, height: 8, color: '#ff751f', radius: 50 },
+      { x: -210, y: 34, width: 8, height: 8, color: '#7e22ce', radius: 50 },
+    ]
+    safePoint.forEach((r) => {
+      const point = new Graphics()
+      // point.pivot.set(0.5, 0.5)
+      point.roundRect(r.x - r.radius * 0.1, r.y - r.radius * 0.1, r.width, r.height, r.radius).fill(r.color)
+      point.stroke({ color: '#ffffff', width: 1 })
+      container1.addChild(point)
+    })
+
+    // 绘制文字
+    const numberParam: { text: string; x: number; y: number; color: string }[] = [
+      { text: '奇', x: 21, y: -11.3, color: '#3b82f6' },
+      { text: '奇', x: -21, y: 11.3, color: '#3b82f6' },
+      { text: '偶', x: -18.75, y: -3.4, color: '#ff751f' },
+      { text: '1', x: -22.75, y: -3.4, color: '#ff751f' },
+      { text: '偶', x: 18.75, y: -3.4, color: '#ff751f' },
+      { text: '偶', x: -18.75, y: 3.4, color: '#ff751f' },
+    ]
+    numberParam.forEach((r) => {
+      const text = new Text({
+        text: r.text,
+        style: {
+          fontSize: 18,
+          fill: r.color,
+          fontFamily: 'Arial',
+          align: 'center',
+          stroke: { color: 'white', width: 2 },
+        },
+      })
+      text.anchor.set(0.5, 0.5)
+      text.position.set(r.x * YmToPx, r.y * YmToPx)
+      container1.addChild(text)
+    })
+
+    const squareMask = new Graphics()
+    const width = floor.width
+    const height = floor.height
+    squareMask.rect(-width / 2, -height / 2, width, height)
+    squareMask.fill({ color: 'white' })
+    container0.mask = squareMask
+    container0.addChild(squareMask)
+
+    container1.mask = squareMask
+    container1.addChild(squareMask)
+
+    // take screenshot
+    await new Promise((resolve) => setTimeout(resolve, 1000))
+    const url = await app.renderer.extract.base64(app.stage)
+    const screenshot = document.createElement('a')
+    document.body.append(screenshot)
+    screenshot.style.position = 'fixed'
+    screenshot.style.top = '20px'
+    screenshot.style.right = '20px'
+    screenshot.download = name
+    screenshot.href = url
+    const image = new Image()
+    image.width = app.screen.width / 4
+    image.src = url
+    screenshot.innerHTML = image.outerHTML
+  })
+</script>

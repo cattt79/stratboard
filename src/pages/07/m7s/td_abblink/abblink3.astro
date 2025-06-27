@@ -60,8 +60,10 @@ import StratBoard from '@/components/StratBoard.astro'
     // 角色图标
     const roleParam: { type: RoleType; x: number; y: number; a: number }[] = [
       { type: 'tank', x: 1, y: -10, a: 1 },
-      { type: 'all', x: 4, y: -10, a: 1 },
+      { type: 'melee', x: 4, y: -10, a: 1 },
       { type: 'tank', x: -23.5, y: -11, a: 1 },
+      { type: 'ranged_magic', x: 9, y: 2, a: 1 },
+      { type: 'healer', x: 6, y: 2, a: 1 },
     ]
 
     // 连线
@@ -105,6 +107,18 @@ import StratBoard from '@/components/StratBoard.astro'
     role.position.set(roleParam[1].x * YmToPx, roleParam[1].y * YmToPx)
     role.alpha = roleParam[1].a
     container.addChild(role)
+
+    const ranged_magic = new Role(roleParam[3].type)
+    ranged_magic.scale.set(0.5)
+    ranged_magic.position.set(roleParam[3].x * YmToPx, roleParam[3].y * YmToPx)
+    ranged_magic.alpha = roleParam[3].a
+    container.addChild(ranged_magic)
+
+    const healer = new Role(roleParam[4].type)
+    healer.scale.set(0.5)
+    healer.position.set(roleParam[4].x * YmToPx, roleParam[4].y * YmToPx)
+    healer.alpha = roleParam[4].a
+    container.addChild(healer)
 
     // 蒙版
     const rectMask = new Graphics()
