@@ -1,0 +1,79 @@
+---
+import Layout from '@/layouts/Layout.astro'
+import StratBoard from '@/components/StratBoard.astro'
+---
+
+<Layout title="M7S">
+  <div class="flex h-screen w-screen items-center justify-center">
+    <StratBoard class="scale-200" key="stratboard" />
+  </div>
+</Layout>
+
+<script>
+  import { listenKeys } from 'nanostores'
+  import { Assets, Container, Graphics, Sprite } from 'pixi.js'
+
+  import { getScale } from '@/pixi/scale'
+  import { setWaymark } from '@/pixi/waymark'
+  import { $stratBoards } from '@/stores/stratBoards'
+
+  import { waymarkDataDB } from '../_waymark'
+
+  import floor_img from '/assets/07/m7s/floor_p2_3@3x.png?url'
+
+  const name = 'zari_safe_zone'
+
+  listenKeys($stratBoards, ['stratboard'], async (stratBoards) => {
+    const app = stratBoards.stratboard
+
+    const container = new Container()
+    container.position.set(app.screen.width / 2, app.screen.height / 2)
+    app.stage.addChild(container)
+
+    const floorTexture = await Assets.load(floor_img)
+    const floor = Sprite.from(floorTexture)
+    floor.anchor.set(0.5, 0.5)
+    floor.scale.set(getScale())
+    container.addChild(floor)
+
+    await setWaymark(container, waymarkDataDB, 0.65)
+
+    // 绘制安全区
+    const polygon = new Graphics()
+    polygon.poly([-122, -92, -153, -62, -144, -53, -100, -53, -91, -62])
+    polygon.position.set(app.screen.width / 2, app.screen.height / 2)
+    polygon.fill({ color: '8dcc85', alpha: 0.6 })
+    polygon.stroke({ width: 4, color: '8dcc85' })
+    app.stage.addChild(polygon)
+
+    const polygon2 = new Graphics()
+    polygon2.poly([60, -100, 53, -94, 96, -53, 120, -53, 120, -96, 116, -100])
+    polygon2.position.set(app.screen.width / 2, app.screen.height / 2)
+    polygon2.fill({ color: '8dcc85', alpha: 0.5 })
+    polygon2.stroke({ width: 4, color: '8dcc85' })
+    app.stage.addChild(polygon2)
+
+    const squareMask = new Graphics()
+    const width = floor.width // 46.4
+    const height = floor.height
+    squareMask.rect(-width / 2, -height / 2, width, height)
+    squareMask.fill({ color: 'white' })
+    container.mask = squareMask
+    container.addChild(squareMask)
+
+    // take screenshot
+    await new Promise((resolve) => setTimeout(resolve, 1000))
+    const url = await app.renderer.extract.base64(app.stage)
+    const screenshot = document.createElement('a')
+    document.body.append(screenshot)
+    screenshot.style.position = 'fixed'
+    screenshot.style.top = '20px'
+    screenshot.style.right = '20px'
+    screenshot.download = name
+    screenshot.href = url
+    const image = new Image()
+    image.width = app.screen.width / 4
+    image.src = url
+    screenshot.innerHTML = image.outerHTML
+  })
+</script>

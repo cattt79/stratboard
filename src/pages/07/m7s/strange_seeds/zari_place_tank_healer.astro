@@ -1,0 +1,146 @@
+---
+import Layout from '@/layouts/Layout.astro'
+import StratBoard from '@/components/StratBoard.astro'
+---
+
+<Layout title="M7S">
+  <div class="flex h-screen w-screen items-center justify-center">
+    <StratBoard class="scale-200" key="stratboard" />
+  </div>
+</Layout>
+
+<script>
+  import { listenKeys } from 'nanostores'
+  import { Assets, Container, Graphics, Sprite, Text } from 'pixi.js'
+
+  import type { CombinedRoleType, RoleType } from '@/lib/role'
+
+  import { AoE, AOE_PRESET } from '@/pixi/aoe'
+  import { createRoleIcon } from '@/pixi/role'
+  import { getScale, YmToPx } from '@/pixi/scale'
+  import { setWaymark } from '@/pixi/waymark'
+  import { $stratBoards } from '@/stores/stratBoards'
+
+  import { waymarkDataDB } from '../_waymark'
+
+  import floor_img from '/assets/07/m7s/floor_p2_3@3x.png?url'
+  import lockon_img from '/game/vfx/lockon/eff/lockon5_t0h@3x.png?url'
+
+  const name = 'zari_place_tank_healer'
+
+  listenKeys($stratBoards, ['stratboard'], async (stratBoards) => {
+    const app = stratBoards.stratboard
+
+    const container0 = new Container()
+    container0.position.set(app.screen.width / 2, app.screen.height / 2)
+    app.stage.addChild(container0)
+
+    const floorTexture = await Assets.load(floor_img)
+    const floor = Sprite.from(floorTexture)
+    floor.anchor.set(0.5, 0.5)
+    floor.scale.set(getScale())
+    container0.addChild(floor)
+
+    await setWaymark(container0, waymarkDataDB, 0.65)
+
+    // 绘制安全区
+    const polygon = new Graphics()
+    polygon.poly([-122, -92, -153, -62, -144, -53, -100, -53, -91, -62])
+    polygon.position.set(app.screen.width / 2, app.screen.height / 2)
+    polygon.fill({ color: '8dcc85', alpha: 0.6 })
+    polygon.stroke({ width: 4, color: '8dcc85' })
+    app.stage.addChild(polygon)
+
+    const polygon2 = new Graphics()
+    polygon2.poly([60, -100, 53, -94, 96, -53, 120, -53, 120, -96, 116, -100])
+    polygon2.position.set(app.screen.width / 2, app.screen.height / 2)
+    polygon2.fill({ color: '8dcc85', alpha: 0.5 })
+    polygon2.stroke({ width: 4, color: '8dcc85' })
+    app.stage.addChild(polygon2)
+
+    const container1 = new Container()
+    container1.position.set(app.screen.width / 2, app.screen.height / 2)
+    app.stage.addChild(container1)
+
+    // 绘制职能点位与点名
+    const lockonTexture = await Assets.load(lockon_img)
+    const roleParams: { type: CombinedRoleType | RoleType; tag: string; x: number; y: number }[] = [
+      { type: 'tank|healer', tag: '', x: 0, y: -11.5 },
+      { type: 'tank|healer', tag: '', x: -3.4, y: -3.4 },
+      { type: 'tank|healer', tag: '', x: -12, y: -7 },
+      { type: 'tank|healer', tag: '', x: 10, y: -8 },
+    ]
+    const circleAoe = AoE.createCircles(
+      app,
+      [
+        { position: { x: roleParams[0].x, y: roleParams[0].y } },
+        { position: { x: roleParams[1].x, y: roleParams[1].y } },
+      ],
+      6,
+      AOE_PRESET.lockon_circle_aoe_1,
+    )
+    container1.addChild(circleAoe)
+
+    roleParams.forEach((r, i) => {
+      const role = createRoleIcon(r.type, r.tag)
+      role.scale.set(0.35)
+      role.position.set(r.x * YmToPx, r.y * YmToPx)
+      container1.addChild(role)
+
+      if (i < 2) {
+        const lockon = new Sprite(lockonTexture)
+        lockon.anchor.set(0.5, 0.5)
+        lockon.position.set(r.x * YmToPx, (r.y - 2.7) * YmToPx)
+        lockon.scale.set(0.4)
+        container1.addChild(lockon)
+      }
+    })
+
+    // 绘制文字
+    const numberParam: { text: string; x: number; y: number; color: string }[] = [
+      { text: '奇', x: 2.5, y: -11.3, color: '#3b82f6' },
+      { text: '偶', x: -0.5, y: -3.4, color: '#ff751f' },
+    ]
+    numberParam.forEach((r) => {
+      const text = new Text({
+        text: r.text,
+        style: {
+          fontSize: 18,
+          fill: r.color,
+          fontFamily: 'Arial',
+          align: 'center',
+          stroke: { color: 'white', width: 2 },
+        },
+      })
+      text.anchor.set(0.5, 0.5)
+      text.position.set(r.x * YmToPx, r.y * YmToPx)
+      container1.addChild(text)
+    })
+
+    const squareMask = new Graphics()
+    const width = floor.width
+    const height = floor.height
+    squareMask.rect(-width / 2, -height / 2, width, height)
+    squareMask.fill({ color: 'white' })
+    container0.mask = squareMask
+    container0.addChild(squareMask)
+
+    container1.mask = squareMask
+    container1.addChild(squareMask)
+
+    // take screenshot
+    await new Promise((resolve) => setTimeout(resolve, 1000))
+    const url = await app.renderer.extract.base64(app.stage)
+    const screenshot = document.createElement('a')
+    document.body.append(screenshot)
+    screenshot.style.position = 'fixed'
+    screenshot.style.top = '20px'
+    screenshot.style.right = '20px'
+    screenshot.download = name
+    screenshot.href = url
+    const image = new Image()
+    image.width = app.screen.width / 4
+    image.src = url
+    screenshot.innerHTML = image.outerHTML
+  })
+</script>
