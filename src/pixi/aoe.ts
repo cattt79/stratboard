@@ -202,9 +202,19 @@ export class AoETexture extends Texture {
     this.resolution = resolution
   }
 
-  getCenterPivot() {
-    if (this.type === 'ray' || this.type === 'fan') {
+  getCenterPivot(metaData?: Record<string, any>) {
+    // TODO：ringFan 的中心点
+    if (this.type === 'ray') {
       return new Point(YmToPx * this.resolution, this.height / 2)
+    } else if (this.type === 'fan') {
+      const angle = (metaData?.angle ?? 0) % 360
+      if (angle <= 180) {
+        return new Point(YmToPx * this.resolution, this.height / 2)
+      } else {
+        const radius = metaData?.radius ?? 0
+        const radian = degToRad(angle / 2 - 90)
+        return new Point((1 + radius * Math.sin(radian)) * YmToPx * this.resolution, this.height / 2)
+      }
     } else {
       return new Point(this.width / 2, this.height / 2)
     }
@@ -214,6 +224,7 @@ export class AoETexture extends Texture {
 export class AoE extends Container {
   type: AoEType
   resolution: number
+  metaData?: Record<string, any>
 
   constructor(
     type: AoEType,
@@ -223,11 +234,13 @@ export class AoE extends Container {
     aoeAlpha?: number,
     innerShadowOptions?: Partial<GlowFilterOptions>,
     outerGlowOptions?: Partial<GlowFilterOptions>,
+    metaData?: Record<string, any>,
   ) {
     super()
 
     this.type = type
     this.resolution = resolution
+    this.metaData = metaData
 
     const innerShadow = AoE.createInnerShadow(
       fn,
@@ -264,7 +277,7 @@ export class AoE extends Container {
   toSprite(app: Application) {
     const texture = this.toTexture(app)
     const sprite = Sprite.from(texture)
-    const centerPivot = texture.getCenterPivot()
+    const centerPivot = texture.getCenterPivot(this.metaData)
     sprite.pivot.set(centerPivot.x, centerPivot.y)
     sprite.scale.set(1 / this.resolution)
     return sprite
@@ -449,6 +462,7 @@ export class AoE extends Container {
       options.aoeAlpha,
       options.innerShadowOptions,
       options.outerGlowOptions,
+      { angle, radius },
     )
     return aoe
   }
@@ -521,7 +535,8 @@ export class AoE extends Container {
   }
 
   /**
-   * 创建部分的环形AoE效果
+   * TODO：修正中心点（Pivot）
+   * 创建扇环AoE效果
    */
   static createRingFan(innerRadius: number, outerRadius: number, angle: number, options: AoECreateOptions = {}): AoE {
     const { resolution = DEFAULT_AOE_RESOLUTION } = options
