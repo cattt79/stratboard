@@ -35,13 +35,11 @@ import StratBoard from '@/components/StratBoard.astro'
 
     const floorTexture = await Assets.load(floor_img)
     const floor = Sprite.from(floorTexture)
-    const centerToNorth = 17.54 * Math.cos(Math.PI / 5) + 8
-    const centerToSouth = 17.54 + 8
     const radianSW = (2 * 2 * Math.PI) / 5
     const radianSE = -(2 * 0 * Math.PI) / 5
     const radius = 17.54
     const YmToPxLarge = YmToPx * 1.25
-    floor.anchor.set(0.5, centerToNorth / (centerToNorth + centerToSouth))
+    floor.anchor.set(0.5, 0.5)
     floor.scale.set(getScale() * 1.25)
     container.addChild(floor)
 
@@ -85,7 +83,7 @@ import StratBoard from '@/components/StratBoard.astro'
     const skywardLeapTexture = await Assets.load(skywardLeap)
     skywardLeapParams.forEach((r, i) => {
       const skywardLeap = Sprite.from(skywardLeapTexture)
-      skywardLeap.anchor.set(0.5, centerToNorth / (centerToNorth + centerToNorth))
+      skywardLeap.anchor.set(0.5, 0.5)
       const p = convertCoordinates(r.p, 'cartesian')
       skywardLeap.position.set((p.x + (i % 2 === 0 ? 0 : -0)) * YmToPxLarge, (p.y - 1.3) * YmToPxLarge)
       skywardLeap.scale.set(getScale() * 0.04)
