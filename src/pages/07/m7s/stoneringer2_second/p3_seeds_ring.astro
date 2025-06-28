@@ -40,7 +40,7 @@ import StratBoard from '@/components/StratBoard.astro'
     floor.scale.set(getScale())
     container.addChild(floor)
 
-    await setWaymark(container, waymarkDataAC1234, 0.65)
+    await setWaymark(container, waymarkDataAC1234, 0.65, 10)
 
     const squareMask = new Graphics()
     const width = 46.4 * YmToPx
@@ -90,7 +90,7 @@ import StratBoard from '@/components/StratBoard.astro'
     })
 
     // role
-    const role = new Role('all', 'All')
+    const role = new Role('all')
     role.scale.set(0.45)
     role.position.set(0 * YmToPx, 14 * YmToPx)
     container.addChild(role)
