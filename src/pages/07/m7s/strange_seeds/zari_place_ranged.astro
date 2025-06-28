@@ -49,7 +49,6 @@ import StratBoard from '@/components/StratBoard.astro'
     const roleParams: { type: CombinedRoleType | RoleType; tag: string; x: number; y: number }[] = [
       { type: 'ranged', tag: 'D3', x: -23.75, y: 11 },
       { type: 'ranged', tag: 'D3', x: 23.75, y: -11.2 },
-      { type: 'ranged', tag: 'D3', x: 21, y: -3.4 },
     ]
     roleParams.forEach((r) => {
       const role = createRoleIcon(r.type, r.tag)
@@ -60,7 +59,8 @@ import StratBoard from '@/components/StratBoard.astro'
 
     const safePoint: { x: number; y: number; width: number; height: number; color: string; radius: number }[] = [
       { x: -210, y: -34, width: 8, height: 8, color: '#ff751f', radius: 50 },
-      { x: -210, y: 34, width: 8, height: 8, color: '#7e22ce', radius: 50 },
+      { x: -210, y: 34, width: 8, height: 8, color: 'green', radius: 50 },
+      { x: 210, y: -34, width: 8, height: 8, color: '#ff751f', radius: 50 },
     ]
     safePoint.forEach((r) => {
       const point = new Graphics()
