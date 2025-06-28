@@ -15,11 +15,12 @@ import StratBoard from '@/components/StratBoard.astro'
 
   import type { RoleType } from '@/lib/role'
 
-  import { CombinedRole, Role } from '@/pixi/role'
+  import { Role } from '@/pixi/role'
   import { getScale, YmToPx } from '@/pixi/scale'
   import { $stratBoards } from '@/stores/stratBoards'
 
-  import floor_img from '/assets/07/m8s2/floor_2@3x.png?url'
+  import floor_img from '/assets/07/m8s2/floor_8@3x.png?url'
+  import tower_img from '/game/vfx/omen/eff/m0119_trap_01t@3x.png?url'
 
   const name = 'demo'
 
@@ -37,24 +38,45 @@ import StratBoard from '@/components/StratBoard.astro'
     floor.scale.set(getScale() * 1.25)
     container.addChild(floor)
 
-    const roleParams: { type: RoleType; tag: string; platform: number }[] = [
-      { type: 'tank', tag: 'MT', platform: 1 },
-      { type: 'tank', tag: 'ST', platform: 4 },
+    // 造塔 TODO:这里应该替换成双人塔
+    const towerTexture = await Assets.load(tower_img)
+    const towerPositions = [
+      { platform: 1, type: 1 },
+      { platform: 2, type: 1 },
+      { platform: 3, type: 1 },
+      { platform: 4, type: 1 },
     ]
 
+    towerPositions.forEach((p) => {
+      const radian = (2 * p.platform * Math.PI) / 5
+      const tower = Sprite.from(towerTexture)
+      tower.anchor.set(0.5, 0.5)
+      tower.scale.set(0.35)
+      tower.position.set(-17.54 * YmToPxLarge * Math.sin(radian), 17.54 * YmToPxLarge * Math.cos(radian))
+      tower.blendMode = 'overlay'
+      container.addChild(tower)
+    })
+
+    const roleParams: { type: RoleType; tag: string; platform: number; offset: number }[] = [
+      { type: 'tank', tag: 'MT', platform: 1, offset: 1 },
+      { type: 'healer', tag: 'H1', platform: 1, offset: -1 },
+      { type: 'melee', tag: 'D1', platform: 2, offset: 1 },
+      { type: 'ranged', tag: 'D3', platform: 2, offset: -1 },
+      { type: 'dps', tag: 'D2', platform: 3, offset: 1 },
+      { type: 'magic', tag: 'D4', platform: 3, offset: -1 },
+      { type: 'tank', tag: 'ST', platform: 4, offset: 1 },
+      { type: 'healer', tag: 'H2', platform: 4, offset: -1 },
+    ]
     roleParams.forEach((r) => {
       const radian = (2 * r.platform * Math.PI) / 5
       const role = new Role(r.type, r.tag)
-      role.scale.set(0.6)
-      role.position.set(-17.54 * YmToPxLarge * Math.sin(radian), 17.54 * YmToPxLarge * Math.cos(radian))
+      role.scale.set(0.4)
+      role.position.set(
+        -17.54 * YmToPxLarge * Math.sin(radian) + r.offset * YmToPxLarge,
+        17.54 * YmToPxLarge * Math.cos(radian),
+      )
       container.addChild(role)
     })
-
-    // add the rest of party on the south platform
-    const allParty = new CombinedRole('healer', 'dps')
-    allParty.scale.set(0.6)
-    allParty.position.set(-17.54 * YmToPxLarge * Math.sin(0), 17.54 * YmToPxLarge * Math.cos(0))
-    container.addChild(allParty)
 
     // take screenshot
     await new Promise((resolve) => setTimeout(resolve, 1000))

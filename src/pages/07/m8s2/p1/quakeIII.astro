@@ -33,13 +33,11 @@ import StratBoard from '@/components/StratBoard.astro'
 
     const floorTexture = await Assets.load(floor_img)
     const floor = Sprite.from(floorTexture)
-    const centerToNorth = 17.54 * Math.cos(Math.PI / 5) + 8
-    const centerToSouth = 17.54 + 8
     const radianSW = (2 * 1 * Math.PI) / 5
     const radianSE = -(2 * 1 * Math.PI) / 5
     const YmToPxLarge = 1.25 * YmToPx
     // const radius = 17.54
-    floor.anchor.set(0.5, centerToNorth / (centerToNorth + centerToSouth))
+    floor.anchor.set(0.5, 0.5)
     floor.scale.set(getScale() * 1.25)
     container.addChild(floor)
 
