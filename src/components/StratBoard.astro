@@ -70,11 +70,7 @@ const {
         // Images will be rendered 4x larger
         // But the actual dom size remains 864x864 due to CSS classes `h-[864px]`  `w-[864px]`
         // This ensures sharp image quality while maintaining correct display size
-        // resolution:
-        //    this.dataset.resolution === '0'
-        //    ? window.devicePixelRatio || 1
-        //    : Number.parseInt(this.dataset.resolution ?? '1'),
-        resolution: 3,
+        resolution: this.dataset.resolution === '0' ? 3 : Number.parseInt(this.dataset.resolution ?? '3'),
         backgroundAlpha: 0,
         preference: 'webgpu',
         antialias: true,
