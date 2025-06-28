@@ -1,0 +1,169 @@
+---
+import Layout from '@/layouts/Layout.astro'
+import StratBoard from '@/components/StratBoard.astro'
+---
+
+<Layout title="M7S">
+  <div class="flex h-screen w-screen items-center justify-center">
+    <StratBoard key="stratboard" />
+  </div>
+</Layout>
+
+<script>
+  import { listenKeys } from 'nanostores'
+  import { Assets, Container, Graphics, Sprite } from 'pixi.js'
+
+  import type { RoleType } from '@/lib/role'
+  import type { Coordinates } from '@/pixi/coordinates'
+
+  import { convertCoordinates } from '@/pixi/coordinates'
+  import { Role } from '@/pixi/role'
+  import { getScale, YmToPx } from '@/pixi/scale'
+  import { setWaymark } from '@/pixi/waymark'
+  import { $stratBoards } from '@/stores/stratBoards'
+
+  import { waymarkDataAC1234 } from '../_waymark'
+
+  import blooming_img from '/assets/07/m7s/adds/blooming_abomination.png?url'
+  import floor_img from '/assets/07/m7s/floor_p3_3@3x.png?url'
+  import chn_img from '/game/vfx/channeling/eff/chn_thorn_fix@3x.png?url'
+  import stone_eye_img from '/game/vfx/lockon/eff/gaze.png?url'
+
+  const name = 'p3_sinister_seeds_move_1'
+
+  listenKeys($stratBoards, ['stratboard'], async (stratBoards) => {
+    const app = stratBoards.stratboard
+
+    const container = new Container()
+    container.position.set(app.screen.width / 2, app.screen.height / 2)
+    app.stage.addChild(container)
+
+    const floorTexture = await Assets.load(floor_img)
+    const floor = Sprite.from(floorTexture)
+    floor.anchor.set(0.5, 0.5)
+    floor.scale.set(getScale())
+    container.addChild(floor)
+
+    await setWaymark(container, waymarkDataAC1234, 0.65)
+
+    const squareMask = new Graphics()
+    const width = 46.4 * YmToPx
+    squareMask.rect(-width / 2, -width / 2, width, width)
+    squareMask.fill({ color: 'white' })
+    container.mask = squareMask
+    container.addChild(squareMask)
+
+    const roleParams: {
+      type: RoleType
+      tag: string
+      coord: Coordinates
+    }[] = [
+      { type: 'melee', tag: 'D1', coord: { x: -9, y: -6 } },
+      { type: 'dps', tag: 'D2', coord: { x: 4, y: 9 } },
+      { type: 'tank', tag: 'MT', coord: { x: -7, y: -7 } },
+      { type: 'tank', tag: 'ST', coord: { x: 8, y: 8 } },
+      { type: 'healer', tag: 'H1', coord: { x: -12, y: -2 } },
+      { type: 'healer', tag: 'H2', coord: { x: 12, y: 2 } },
+      { type: 'ranged', tag: 'D3', coord: { x: -2, y: -12 } },
+      { type: 'magic', tag: 'D4', coord: { x: 2, y: 12 } },
+    ]
+
+    const chains: {
+      start: Coordinates
+      end: Coordinates
+    }[] = [
+      { start: roleParams[4].coord, end: { x: -24, y: 0 } },
+      { start: roleParams[5].coord, end: { x: 24, y: 0 } },
+      { start: roleParams[6].coord, end: { x: 0, y: -24 } },
+      { start: roleParams[7].coord, end: { x: 0, y: 24 } },
+    ]
+
+    const bloomingAbominationParams: {
+      coord: Coordinates
+    }[] = [
+      { coord: { x: -6, y: -2 } },
+      { coord: { x: -3, y: -7 } },
+      { coord: { x: 5, y: 0 } },
+      { coord: { x: 0, y: 5 } },
+    ]
+
+    function distance(coord1: Coordinates, coord2: Coordinates) {
+      const pos1 = convertCoordinates(coord1, 'cartesian')
+      const pos2 = convertCoordinates(coord2, 'cartesian')
+      return Math.sqrt((pos1.x - pos2.x) ** 2 + (pos1.y - pos2.y) ** 2)
+    }
+
+    // 连线
+    const chnTexture = await Assets.load(chn_img)
+    chains.forEach((c) => {
+      const p1 = convertCoordinates(c.start, 'cartesian')
+      const p2 = convertCoordinates(c.end, 'cartesian')
+      const dx = p2.x - p1.x
+      const dy = p2.y - p1.y
+      const mid_x = (p2.x + p1.x) / 2
+      const mid_y = (p2.y + p1.y) / 2
+      const len = Math.sqrt(dx * dx + dy * dy)
+      const angle = Math.atan2(dy, dx)
+      const chn = new Sprite(chnTexture)
+      chn.anchor.set(0.5, 0.5)
+      chn.position.set(mid_x * YmToPx, mid_y * YmToPx)
+      chn.rotation = angle + Math.PI
+      chn.width = len * YmToPx
+      chn.height = 4 * YmToPx
+      container.addChild(chn)
+    })
+
+    // 确保每个人的距离小于30，仅用于开发时检测
+    roleParams.forEach((c1, i1) => {
+      roleParams.forEach((c2, i2) => {
+        if (i1 < i2) {
+          if (distance(c1.coord, c2.coord) > 30) {
+            console.log('error')
+          }
+        }
+      })
+    })
+
+    const bloomingTexture = await Assets.load(blooming_img)
+    bloomingAbominationParams.forEach((c) => {
+      const blooming_sprite = new Sprite(bloomingTexture)
+      const pos = convertCoordinates(c.coord, 'cartesian')
+      blooming_sprite.anchor.set(0.5, 0.5)
+      blooming_sprite.scale.set(0.03)
+      blooming_sprite.position.set(pos.x * YmToPx, pos.y * YmToPx)
+      container.addChild(blooming_sprite)
+    })
+
+    // 职业图标
+    roleParams.forEach((r) => {
+      const role = new Role(r.type, r.tag)
+      const pos = convertCoordinates(r.coord, 'cartesian')
+      role.scale.set(0.4)
+      role.position.set(pos.x * YmToPx, pos.y * YmToPx)
+      container.addChild(role)
+    })
+
+    // 背对
+    const stoneEyeTexture = await Assets.load(stone_eye_img)
+    const stoneEyeSprite = new Sprite(stoneEyeTexture)
+    stoneEyeSprite.anchor.set(0.5, 0.5)
+    stoneEyeSprite.scale.set(0.1)
+    stoneEyeSprite.position.set(0, 0)
+    container.addChild(stoneEyeSprite)
+
+    // take screenshot
+    await new Promise((resolve) => setTimeout(resolve, 1000))
+    const url = await app.renderer.extract.base64(app.stage)
+    const screenshot = document.createElement('a')
+    document.body.append(screenshot)
+    screenshot.style.position = 'fixed'
+    screenshot.style.top = '20px'
+    screenshot.style.right = '20px'
+    screenshot.download = name
+    screenshot.href = url
+    const image = new Image()
+    image.width = app.screen.width / 4
+    image.src = url
+    screenshot.innerHTML = image.outerHTML
+  })
+</script>
