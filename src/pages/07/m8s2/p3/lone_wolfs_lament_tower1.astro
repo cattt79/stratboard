@@ -13,16 +13,15 @@ import StratBoard from '@/components/StratBoard.astro'
   import { listenKeys } from 'nanostores'
   import { Assets, Container, Sprite } from 'pixi.js'
 
-  import type { RoleType } from '@/lib/role'
-
-  import { Role } from '@/pixi/role'
   import { getScale, YmToPx } from '@/pixi/scale'
   import { $stratBoards } from '@/stores/stratBoards'
 
-  import floor_img from '/assets/07/m8s2/floor_8@3x.png?url'
-  import tower_img from '/game/vfx/omen/eff/general_trap_o2x@3x.png?url'
+  import floor_img from '/assets/07/m8s2/floor_12@3x.png?url'
+  import tower2_img from '/game/vfx/omen/eff/general_trap_o2x@3x.png?url'
+  import tower3_img from '/game/vfx/omen/eff/general_trap_o3x@3x.png?url'
+  import tower1_img from '/game/vfx/omen/eff/m0119_trap_01t@3x.png?url'
 
-  const name = 'elemental_purge_tower_solution'
+  const name = 'elemental_purge_tower1'
 
   listenKeys($stratBoards, ['stratboard'], async (stratBoards) => {
     const app = stratBoards.stratboard
@@ -39,47 +38,40 @@ import StratBoard from '@/components/StratBoard.astro'
     container.addChild(floor)
 
     // 造塔
-    // 这里type没有实际意义，
     // 1 = 单人塔
     // 2 = 双人塔
     // 3 = 三人塔
-    const towerTexture = await Assets.load(tower_img)
+    const tower1Texture = await Assets.load(tower1_img)
+    const tower2Texture = await Assets.load(tower2_img)
+    const tower3Texture = await Assets.load(tower3_img)
     const towerPositions = [
-      { platform: 1, type: 2 },
-      { platform: 2, type: 2 },
+      { platform: 0, type: 3 },
+      { platform: 1, type: 1 },
+      { platform: 2, type: 1 },
       { platform: 3, type: 2 },
-      { platform: 4, type: 2 },
+      { platform: 4, type: 1 },
     ]
 
     towerPositions.forEach((p) => {
       const radian = (2 * p.platform * Math.PI) / 5
-      const tower = Sprite.from(towerTexture)
+      const tower = (function () {
+        switch (p.type) {
+          case 1:
+            return Sprite.from(tower1Texture)
+          case 2:
+            return Sprite.from(tower2Texture)
+          case 3:
+            return Sprite.from(tower3Texture)
+          default:
+            return Sprite.from(tower1Texture)
+        }
+      })()
+
       tower.anchor.set(0.5, 0.5)
       tower.scale.set(0.35)
       tower.position.set(-17.54 * YmToPxLarge * Math.sin(radian), 17.54 * YmToPxLarge * Math.cos(radian))
       tower.blendMode = 'overlay'
       container.addChild(tower)
-    })
-
-    const roleParams: { type: RoleType; tag: string; platform: number; offset: number }[] = [
-      { type: 'tank', tag: 'MT', platform: 1, offset: 1 },
-      { type: 'healer', tag: 'H1', platform: 1, offset: -1 },
-      { type: 'melee', tag: 'D1', platform: 2, offset: 1 },
-      { type: 'ranged', tag: 'D3', platform: 2, offset: -1 },
-      { type: 'dps', tag: 'D2', platform: 3, offset: 1 },
-      { type: 'magic', tag: 'D4', platform: 3, offset: -1 },
-      { type: 'tank', tag: 'ST', platform: 4, offset: 1 },
-      { type: 'healer', tag: 'H2', platform: 4, offset: -1 },
-    ]
-    roleParams.forEach((r) => {
-      const radian = (2 * r.platform * Math.PI) / 5
-      const role = new Role(r.type, r.tag)
-      role.scale.set(0.4)
-      role.position.set(
-        -17.54 * YmToPxLarge * Math.sin(radian) + r.offset * YmToPxLarge,
-        17.54 * YmToPxLarge * Math.cos(radian),
-      )
-      container.addChild(role)
     })
 
     // take screenshot

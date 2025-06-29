@@ -1,0 +1,146 @@
+---
+import Layout from '@/layouts/Layout.astro'
+import StratBoard from '@/components/StratBoard.astro'
+---
+
+<Layout title="M8S2">
+  <div class="flex h-screen w-screen items-center justify-center">
+    <StratBoard key="stratboard" />
+  </div>
+</Layout>
+
+<script>
+  import { listenKeys } from 'nanostores'
+  import { Assets, Container, Sprite } from 'pixi.js'
+
+  import type { RoleType } from '@/lib/role'
+
+  import { Role } from '@/pixi/role'
+  import { getScale, YmToPx } from '@/pixi/scale'
+  import { create_tether } from '@/pixi/tether'
+  import { $stratBoards } from '@/stores/stratBoards'
+
+  import { platform_to_coord } from '../_utils.ts'
+
+  import floor_img from '/assets/07/m8s2/floor_12@3x.png?url'
+  import close_tether_img from '/game/vfx/channeling/eff/chn_closer_0v@3x.png?url'
+  import far_tether_img from '/game/vfx/channeling/eff/chn_leave_0v@3x.png?url'
+  import tower2_img from '/game/vfx/omen/eff/general_trap_o2x@3x.png?url'
+  import tower3_img from '/game/vfx/omen/eff/general_trap_o3x@3x.png?url'
+  import tower1_img from '/game/vfx/omen/eff/m0119_trap_01t@3x.png?url'
+
+  const name = 'lone_wolfs_lament_solution1'
+
+  listenKeys($stratBoards, ['stratboard'], async (stratBoards) => {
+    const app = stratBoards.stratboard
+
+    const container = new Container()
+    container.position.set(app.screen.width / 2, app.screen.height / 2)
+    app.stage.addChild(container)
+
+    const floorTexture = await Assets.load(floor_img)
+    const floor = Sprite.from(floorTexture)
+    const YmToPxLarge = YmToPx * 1.25
+    floor.anchor.set(0.5, 0.5)
+    floor.scale.set(getScale() * 1.25)
+    container.addChild(floor)
+
+    // 造塔
+    // 1 = 单人塔
+    // 2 = 双人塔
+    // 3 = 三人塔
+    const tower1Texture = await Assets.load(tower1_img)
+    const tower2Texture = await Assets.load(tower2_img)
+    const tower3Texture = await Assets.load(tower3_img)
+    const towerPositions = [
+      { platform: 0, type: 3 },
+      { platform: 1, type: 1 },
+      { platform: 2, type: 1 },
+      { platform: 3, type: 2 },
+      { platform: 4, type: 1 },
+    ]
+
+    towerPositions.forEach((p) => {
+      const radian = (2 * p.platform * Math.PI) / 5
+      const tower = (function () {
+        switch (p.type) {
+          case 1:
+            return Sprite.from(tower1Texture)
+          case 2:
+            return Sprite.from(tower2Texture)
+          case 3:
+            return Sprite.from(tower3Texture)
+          default:
+            return Sprite.from(tower1Texture)
+        }
+      })()
+
+      tower.anchor.set(0.5, 0.5)
+      tower.scale.set(0.35)
+      tower.position.set(-17.54 * YmToPxLarge * Math.sin(radian), 17.54 * YmToPxLarge * Math.cos(radian))
+      tower.blendMode = 'overlay'
+      container.addChild(tower)
+    })
+
+    const roleParams: {
+      type: RoleType
+      tag: string
+      platform: number
+      offset: { vertical: number; horizontal: number }
+    }[] = [
+      { type: 'tank', tag: 'MT', platform: 3, offset: { vertical: 0, horizontal: -1 } },
+      { type: 'healer', tag: 'H1', platform: 0, offset: { vertical: 0, horizontal: -1 } },
+      { type: 'melee', tag: 'D1', platform: 3, offset: { vertical: 0, horizontal: 1 } },
+      { type: 'ranged', tag: 'D3', platform: 0, offset: { vertical: 2, horizontal: 0 } },
+      { type: 'dps', tag: 'D2', platform: 4, offset: { vertical: 0, horizontal: 0 } },
+      { type: 'magic', tag: 'D4', platform: 2, offset: { vertical: 0, horizontal: 0 } },
+      { type: 'tank', tag: 'ST', platform: 1, offset: { vertical: 0, horizontal: 0 } },
+      { type: 'healer', tag: 'H2', platform: 0, offset: { vertical: 0, horizontal: 1 } },
+    ]
+
+    roleParams.forEach((r) => {
+      const role = new Role(r.type, r.tag)
+      role.scale.set(0.4)
+
+      const pos = platform_to_coord(r.platform, r.offset, YmToPxLarge)
+
+      role.position.set(pos.x, pos.y)
+      container.addChild(role)
+    })
+
+    // 0 == close, 1 == far
+    const tetherParam = [
+      { start: roleParams[6], end: roleParams[4], type: 1 },
+      { start: roleParams[0], end: roleParams[2], type: 0 },
+      { start: roleParams[7], end: roleParams[3], type: 0 },
+      { start: roleParams[5], end: roleParams[1], type: 1 },
+    ]
+
+    const farTetherTexure = await Assets.load(far_tether_img)
+    const closeTetherTexure = await Assets.load(close_tether_img)
+    tetherParam.forEach((r) => {
+      const startPos = platform_to_coord(r.start.platform, r.start.offset, 1.25)
+
+      const endPos = platform_to_coord(r.end.platform, r.end.offset, 1.25)
+
+      const chn = create_tether(startPos, endPos, r.type === 1 ? farTetherTexure : closeTetherTexure)
+
+      container.addChild(chn)
+    })
+
+    // take screenshot
+    await new Promise((resolve) => setTimeout(resolve, 1000))
+    const url = await app.renderer.extract.base64(app.stage)
+    const screenshot = document.createElement('a')
+    document.body.append(screenshot)
+    screenshot.style.position = 'fixed'
+    screenshot.style.top = '20px'
+    screenshot.style.right = '20px'
+    screenshot.download = name
+    screenshot.href = url
+    const image = new Image()
+    image.width = app.screen.width / 4
+    image.src = url
+    screenshot.innerHTML = image.outerHTML
+  })
+</script>

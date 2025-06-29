@@ -19,10 +19,12 @@ import StratBoard from '@/components/StratBoard.astro'
   import { getScale, YmToPx } from '@/pixi/scale'
   import { $stratBoards } from '@/stores/stratBoards'
 
-  import floor_img from '/assets/07/m8s2/floor_8@3x.png?url'
-  import tower_img from '/game/vfx/omen/eff/general_trap_o2x@3x.png?url'
+  import { platform_to_coord } from '../_utils.ts'
 
-  const name = 'elemental_purge_tower_solution'
+  import floor_img from '/assets/07/m8s2/floor_p12cut@3x.png?url'
+  import stack_tower_img from '/game/vfx/omen/eff/share_trap01k1@3x.png?url'
+
+  const name = 'enrage3'
 
   listenKeys($stratBoards, ['stratboard'], async (stratBoards) => {
     const app = stratBoards.stratboard
@@ -38,47 +40,38 @@ import StratBoard from '@/components/StratBoard.astro'
     floor.scale.set(getScale() * 1.25)
     container.addChild(floor)
 
-    // 造塔
-    // 这里type没有实际意义，
-    // 1 = 单人塔
-    // 2 = 双人塔
-    // 3 = 三人塔
-    const towerTexture = await Assets.load(tower_img)
-    const towerPositions = [
-      { platform: 1, type: 2 },
-      { platform: 2, type: 2 },
-      { platform: 3, type: 2 },
-      { platform: 4, type: 2 },
+    const towerTexture = await Assets.load(stack_tower_img)
+    const tower = Sprite.from(towerTexture)
+    tower.anchor.set(0.5, 0.5)
+    tower.scale.set(0.93)
+    const towerPos = platform_to_coord(2)
+    tower.position.set(towerPos.x * YmToPxLarge, towerPos.y * YmToPxLarge)
+    tower.blendMode = 'overlay'
+    container.addChild(tower)
+
+    const roleParams: {
+      type: RoleType
+      tag: string
+      platform: number
+      offset: { vertical: number; horizontal: number }
+    }[] = [
+      { type: 'tank', tag: 'MT', platform: 3, offset: { vertical: -3, horizontal: -1 } },
+      { type: 'healer', tag: 'H1', platform: 3, offset: { vertical: 0, horizontal: -1 } },
+      { type: 'melee', tag: 'D1', platform: 3, offset: { vertical: -2, horizontal: -3 } },
+      { type: 'ranged', tag: 'D3', platform: 3, offset: { vertical: 3, horizontal: -1 } },
+      { type: 'dps', tag: 'D2', platform: 3, offset: { vertical: -3, horizontal: 1 } },
+      { type: 'magic', tag: 'D4', platform: 3, offset: { vertical: 3, horizontal: 2 } },
+      { type: 'tank', tag: 'ST', platform: 2, offset: { vertical: 0, horizontal: 0 } },
+      { type: 'healer', tag: 'H2', platform: 3, offset: { vertical: 0, horizontal: 1 } },
     ]
 
-    towerPositions.forEach((p) => {
-      const radian = (2 * p.platform * Math.PI) / 5
-      const tower = Sprite.from(towerTexture)
-      tower.anchor.set(0.5, 0.5)
-      tower.scale.set(0.35)
-      tower.position.set(-17.54 * YmToPxLarge * Math.sin(radian), 17.54 * YmToPxLarge * Math.cos(radian))
-      tower.blendMode = 'overlay'
-      container.addChild(tower)
-    })
-
-    const roleParams: { type: RoleType; tag: string; platform: number; offset: number }[] = [
-      { type: 'tank', tag: 'MT', platform: 1, offset: 1 },
-      { type: 'healer', tag: 'H1', platform: 1, offset: -1 },
-      { type: 'melee', tag: 'D1', platform: 2, offset: 1 },
-      { type: 'ranged', tag: 'D3', platform: 2, offset: -1 },
-      { type: 'dps', tag: 'D2', platform: 3, offset: 1 },
-      { type: 'magic', tag: 'D4', platform: 3, offset: -1 },
-      { type: 'tank', tag: 'ST', platform: 4, offset: 1 },
-      { type: 'healer', tag: 'H2', platform: 4, offset: -1 },
-    ]
     roleParams.forEach((r) => {
-      const radian = (2 * r.platform * Math.PI) / 5
       const role = new Role(r.type, r.tag)
       role.scale.set(0.4)
-      role.position.set(
-        -17.54 * YmToPxLarge * Math.sin(radian) + r.offset * YmToPxLarge,
-        17.54 * YmToPxLarge * Math.cos(radian),
-      )
+
+      const pos = platform_to_coord(r.platform, r.offset, YmToPxLarge)
+
+      role.position.set(pos.x, pos.y)
       container.addChild(role)
     })
 
