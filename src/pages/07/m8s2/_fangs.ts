@@ -109,13 +109,13 @@ export async function addFangs(
         options: { colors: aoeColor } })
     }
 
-    const aoe = AoE.createRects(app, rects, 8 * 1.25, 16 * 1.25)
+    const aoe = AoE.createRects(app, rects, (fangAdjust + 0.4) * 2 * 1.25, 18 * 1.25)
     aoe.children.forEach((c, i) => {
       const prCoor = convertCoordinates(c, 'polar-radian')
       const dir = getDirectionSign(i, patternArr[i])
       c.position.set(
-        c.position.x + dir.x * fangAdjust * Math.sin(prCoor.rad) * YmToPxLarge,
-        c.position.y + dir.y * fangAdjust * Math.cos(prCoor.rad) * YmToPxLarge,
+        c.position.x + dir.x * (fangAdjust + 0.4) * Math.sin(prCoor.rad) * YmToPxLarge,
+        c.position.y + dir.y * (fangAdjust + 0.4) * Math.cos(prCoor.rad) * YmToPxLarge,
       )
     })
 

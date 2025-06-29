@@ -21,10 +21,12 @@ import StratBoard from '@/components/StratBoard.astro'
   import { getScale, YmToPx } from '@/pixi/scale'
   import { $stratBoards } from '@/stores/stratBoards'
 
+  import { addFangs } from '../_fangs'
+
   import floor_img from '/assets/07/m8s2/floor_2@3x.png?url'
   import skywardLeap from '/assets/07/m8s2/skyward_leap.png?url'
 
-  const name = 'demo'
+  const name = 'ultraviolentRay1'
 
   listenKeys($stratBoards, ['stratboard'], async (stratBoards) => {
     const app = stratBoards.stratboard
@@ -75,10 +77,12 @@ import StratBoard from '@/components/StratBoard.astro'
     roleParams.forEach((r) => {
       const role = new Role(r.type, r.tag)
       const p = convertCoordinates(r.p, 'cartesian')
-      role.scale.set(0.4)
+      role.scale.set(0.5)
       role.position.set(p.x * YmToPxLarge, p.y * YmToPxLarge)
       container.addChild(role)
     })
+
+    container.addChild(await addFangs(app, { activate: false, patterns: [0, 1, 0, 1, 1] }))
 
     const skywardLeapTexture = await Assets.load(skywardLeap)
     skywardLeapParams.forEach((r, i) => {
@@ -86,7 +90,7 @@ import StratBoard from '@/components/StratBoard.astro'
       skywardLeap.anchor.set(0.5, 0.5)
       const p = convertCoordinates(r.p, 'cartesian')
       skywardLeap.position.set((p.x + (i % 2 === 0 ? 0 : -0)) * YmToPxLarge, (p.y - 1.3) * YmToPxLarge)
-      skywardLeap.scale.set(getScale() * 0.04)
+      skywardLeap.scale.set(getScale() * 0.06)
       container.addChild(skywardLeap)
     })
 
